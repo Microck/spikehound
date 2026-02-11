@@ -3,10 +3,10 @@
 ## Current Position
 
 Phase: 2 of 5 (Investigation Pipeline)
-Plan: 2 of 4
+Plan: 3 of 4
 Status: In progress
-Last activity: 2026-02-11 - Completed 02-02-PLAN.md
-Progress: ███░░░░░░░ 6/18 plans complete (33%)
+Last activity: 2026-02-11 - Completed 02-03-PLAN.md
+Progress: ████░░░░░░ 7/18 plans complete (39%)
 
 ## Current Status
 
@@ -20,7 +20,7 @@ Progress: ███░░░░░░░ 6/18 plans complete (33%)
 | Phase | Name | Status | Progress |
 |-------|------|--------|----------|
 | 1 | Foundation | Complete | 4/4 plans complete, 5/5 requirements validated |
-| 2 | Investigation | In Progress | 2/4 plans complete |
+| 2 | Investigation | In Progress | 3/4 plans complete |
 | 3 | Diagnosis | Not Started | 0/3 plans complete |
 | 4 | Human Loop | Not Started | 0/4 plans complete |
 | 5 | Demo | Not Started | 0/3 plans complete |
@@ -42,6 +42,8 @@ Progress: ███░░░░░░░ 6/18 plans complete (33%)
 | 02-01 | Separate incident persistence (`IncidentStore`) from similarity search (`IncidentSearch`) behind interfaces | Preserves swappable Azure backends while keeping deterministic local fallback behavior |
 | 02-02 | Keep `ResourceFindings.config` optional in degraded outcomes | Ensures resource investigations still return a schema-valid payload when config lookup fails |
 | 02-02 | Resolve target resource IDs via recursive payload key scanning before fallback input | Handles heterogeneous alert payload shapes without hardcoded coordinator coupling |
+| 02-03 | Use env-gated backend selection for History Agent | Enables Cosmos/AI Search when configured while keeping deterministic degraded behavior otherwise |
+| 02-03 | Restrict Cosmos resource auto-creation to dev/local/test | Prevents accidental production-side provisioning while preserving local ergonomics |
 
 ---
 
@@ -55,6 +57,7 @@ None.
 
 | Date | Activity |
 |------|----------|
+| 2026-02-11 | Completed 02-03 history backend plan with Cosmos incident store, Azure AI Search lookup, graceful History Agent fallback, and smoke coverage |
 | 2026-02-11 | Completed 02-02 resource investigation plan with Azure Resource Graph/Activity Logs wrappers, typed resource findings models, and Resource Agent smoke coverage |
 | 2026-02-11 | Completed 02-01 investigation pipeline contracts plan with agent protocol models, deterministic findings merge tests, and incident store/search interfaces |
 | 2026-02-11 | Phase 1 verification accepted; Foundry live endpoint check deferred by approval |
@@ -68,9 +71,9 @@ None.
 
 ## Session Continuity
 
-- Last session: 2026-02-11T02:22:46Z
-- Stopped at: Completed 02-02 resource investigation plan
-- Resume file: `.planning/phases/02-investigation-pipeline/02-03-PLAN.md`
+- Last session: 2026-02-11T02:23:46Z
+- Stopped at: Completed 02-03 history backend plan
+- Resume file: `.planning/phases/02-investigation-pipeline/02-04-PLAN.md`
 
 ---
 
