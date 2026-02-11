@@ -3,6 +3,7 @@ azure-cosmos
 azure-identity
 azure-search-documents
 azure-mgmt-costmanagement
+azure-mgmt-compute
 azure-mgmt-resourcegraph
 azure-mgmt-resource
 azure-mgmt-monitor
