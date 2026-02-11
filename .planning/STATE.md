@@ -2,16 +2,16 @@
 
 ## Current Position
 
-Phase: 1 of 5 (Foundation)
-Plan: 4 of 4
-Status: Phase complete
-Last activity: 2026-02-11 - Phase 1 verification approved (Foundry check deferred)
-Progress: ██░░░░░░░░ 4/18 plans complete (22%)
+Phase: 2 of 5 (Investigation Pipeline)
+Plan: 1 of 4
+Status: In progress
+Last activity: 2026-02-11 - Completed 02-01-PLAN.md
+Progress: ███░░░░░░░ 5/18 plans complete (28%)
 
 ## Current Status
 
-**Current Phase:** Foundation (Phase 1)
-**Next Action:** Execute Phase 2 (`/gsd-execute-phase 2`)
+**Current Phase:** Investigation Pipeline (Phase 2)
+**Next Action:** Execute next Phase 2 plan (`/gsd-execute-phase 2`)
 
 ---
 
@@ -20,7 +20,7 @@ Progress: ██░░░░░░░░ 4/18 plans complete (22%)
 | Phase | Name | Status | Progress |
 |-------|------|--------|----------|
 | 1 | Foundation | Complete | 4/4 plans complete, 5/5 requirements validated |
-| 2 | Investigation | Not Started | 0/4 plans complete |
+| 2 | Investigation | In Progress | 1/4 plans complete |
 | 3 | Diagnosis | Not Started | 0/3 plans complete |
 | 4 | Human Loop | Not Started | 0/4 plans complete |
 | 5 | Demo | Not Started | 0/3 plans complete |
@@ -38,6 +38,8 @@ Progress: ██░░░░░░░░ 4/18 plans complete (22%)
 | 01-03 | Return structured findings even when Azure config is missing | Keeps webhook path stable by surfacing credential/query issues in `notes` instead of failing request handling |
 | 01-04 | Run local app with `uvicorn web.app:app --app-dir src` from a single bootstrap script | Eliminates repeated local setup friction and keeps startup command stable across contributors |
 | 01-04 | Keep Foundry validation read-only by listing at most one agent in smoke checks | Verifies endpoint/auth connectivity without mutating project resources |
+| 02-01 | Keep a shared `AgentResult` envelope (`AgentName`/`AgentStatus`) for all investigator outputs | Lets coordinator aggregate multi-agent results without hardcoded per-agent return shapes |
+| 02-01 | Separate incident persistence (`IncidentStore`) from similarity search (`IncidentSearch`) behind interfaces | Preserves swappable Azure backends while keeping deterministic local fallback behavior |
 
 ---
 
@@ -51,6 +53,7 @@ None.
 
 | Date | Activity |
 |------|----------|
+| 2026-02-11 | Completed 02-01 investigation pipeline contracts plan with agent protocol models, deterministic findings merge tests, and incident store/search interfaces |
 | 2026-02-11 | Phase 1 verification accepted; Foundry live endpoint check deferred by approval |
 | 2026-02-11 | Completed 01-04 foundation ergonomics/foundry plan with dev launcher, pytest smoke harness, and read-only Foundry SDK smoke script |
 | 2026-02-11 | Completed 01-03 foundation vertical slice (webhook -> coordinator -> cost analyst -> findings) with pytest and manual webhook smoke verification |
@@ -62,9 +65,9 @@ None.
 
 ## Session Continuity
 
-- Last session: 2026-02-11T02:01:00Z
-- Stopped at: Phase 1 verification approved (Foundry check deferred)
-- Resume file: `.planning/phases/02-investigation-pipeline/02-01-PLAN.md`
+- Last session: 2026-02-11T02:12:28Z
+- Stopped at: Completed 02-01 investigation pipeline contracts plan
+- Resume file: `.planning/phases/02-investigation-pipeline/02-02-PLAN.md`
 
 ---
 
