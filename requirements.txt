@@ -1,6 +1,7 @@
 azure-ai-projects
 azure-cosmos
 azure-identity
+azure-search-documents
 azure-mgmt-costmanagement
 azure-mgmt-resourcegraph
 azure-mgmt-resource
