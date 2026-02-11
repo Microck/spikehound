@@ -5,13 +5,13 @@
 Phase: 3 of 5 (Diagnosis & Remediation)
 Plan: 2 of 3
 Status: In progress
-Last activity: 2026-02-11 - Completed 03-02 remediation suggestion plan
-Progress: █████░░░░░ 9/18 plans complete (50%)
+Last activity: 2026-02-11 - Completed 03-01 diagnosis synthesis plan
+Progress: ██████░░░░ 10/18 plans complete (56%)
 
 ## Current Status
 
 **Current Phase:** Diagnosis & Remediation (Phase 3)
-**Next Action:** Execute remaining Phase 3 plans (`/gsd-execute-phase 3`)
+**Next Action:** Execute remaining Phase 3 plan (`/gsd-execute-phase 3`)
 
 ---
 
@@ -21,7 +21,7 @@ Progress: █████░░░░░ 9/18 plans complete (50%)
 |-------|------|--------|----------|
 | 1 | Foundation | Complete | 4/4 plans complete, 5/5 requirements validated |
 | 2 | Investigation | Complete | 4/4 plans complete, 6/6 requirements code-verified |
-| 3 | Diagnosis | In Progress | 1/3 plans complete |
+| 3 | Diagnosis | In Progress | 2/3 plans complete |
 | 4 | Human Loop | Not Started | 0/4 plans complete |
 | 5 | Demo | Not Started | 0/3 plans complete |
 
@@ -46,6 +46,9 @@ Progress: █████░░░░░ 9/18 plans complete (50%)
 | 02-03 | Restrict Cosmos resource auto-creation to dev/local/test | Prevents accidental production-side provisioning while preserving local ergonomics |
 | 02-04 | Run coordinator fan-out with `asyncio.gather` + `asyncio.to_thread` and timeout-to-error conversion | Guarantees parallel investigator start while preserving full aggregation even on slow/failing branches |
 | 02-04 | Keep `UnifiedFindings.results` as canonical payload with legacy top-level fields for transition compatibility | Avoids breaking existing consumers/tests while moving webhook contract to multi-agent aggregation |
+| 03-01 | Centralize Foundry call details in `FoundryClient.complete_json` with typed config/response errors | Keeps diagnosis logic mockable and deterministic while isolating Azure OpenAI request shape in one place |
+| 03-01 | Degrade to deterministic diagnosis fallback when Foundry is unavailable or response parsing fails | Ensures diagnosis remains actionable offline and during missing credentials scenarios |
+| 03-01 | Use deterministic confidence tiers (80/60/55/40) tied to explicit fallback rules | Keeps diagnosis behavior reproducible for demo and test workflows |
 | 03-02 | Enforce `human_approval_required` as `Literal[True]` in remediation actions | Guarantees remediation suggestions stay safe-by-default and require explicit human approval |
 | 03-02 | Use deterministic diagnosis-to-action rules for GPU VM no-shutdown and unexpected runtime cases | Keeps remediation behavior reliable in offline/demo runs without LLM dependency |
 | 03-02 | Always emit a fallback `notify_owner` action when no deterministic infrastructure action matches | Ensures remediation plans are never empty for downstream approval workflows |
@@ -62,6 +65,7 @@ None.
 
 | Date | Activity |
 |------|----------|
+| 2026-02-11 | Completed 03-01 diagnosis plan with Foundry client wrapper, diagnosis schema, and deterministic diagnosis-agent fallback logic |
 | 2026-02-11 | Completed 03-02 remediation plan with structured safe-by-default action models, remediation agent, and behavior tests |
 | 2026-02-11 | Phase 2 verification accepted; live Azure validation deferred by approval |
 | 2026-02-11 | Completed 02-04 parallel coordinator plan with concurrent cost/resource/history orchestration, timeout-safe aggregation, unified webhook response, and deterministic barrier-based parallel test |
@@ -79,8 +83,8 @@ None.
 
 ## Session Continuity
 
-- Last session: 2026-02-11T04:08:40Z
-- Stopped at: Completed 03-02 remediation suggestion plan
+- Last session: 2026-02-11T04:10:21Z
+- Stopped at: Completed 03-01 diagnosis synthesis plan
 - Resume file: `.planning/phases/03-diagnosis-remediation/03-03-PLAN.md`
 
 ---
