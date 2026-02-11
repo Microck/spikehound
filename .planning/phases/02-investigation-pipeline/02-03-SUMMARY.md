@@ -127,7 +127,7 @@ None.
 
 ## Next Phase Readiness
 - History backend contracts and graceful fallback behavior are in place.
-- Ready to continue remaining Investigation plans (`02-02` and `02-04`).
+- Ready to continue the remaining Investigation plan (`02-04`).
 - No blockers carried forward.
 
 ---
