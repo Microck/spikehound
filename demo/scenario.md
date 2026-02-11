@@ -37,20 +37,20 @@ curl -X POST http://localhost:8000/webhooks/alert \
     "schemaId": "azureMonitorCommonAlertSchema",
     "data": {
       "essentials": {
-        "alertId": "/subscriptions/495eb1d8-99ac-40d1-9eaf-082d28b8ac56/providers/Microsoft.AlertsManagement/alerts/demo-gpu-spike-001",
+        "alertId": "/subscriptions/<your-subscription-id>/providers/Microsoft.AlertsManagement/alerts/demo-gpu-spike-001",
         "alertRule": "GPU VM Cost Spike",
         "severity": "Sev1",
         "signalType": "Metric",
         "monitorCondition": "Fired",
         "monitoringService": "Cost Management",
         "alertTargetIDs": [
-          "/subscriptions/495eb1d8-99ac-40d1-9eaf-082d28b8ac56/resourceGroups/ai-dev-days-hackathon-eu/providers/Microsoft.Compute/virtualMachines/gpu-training-vm"
+          "/subscriptions/<your-subscription-id>/resourceGroups/ai-dev-days-hackathon-eu/providers/Microsoft.Compute/virtualMachines/gpu-training-vm"
         ],
         "firedDateTime": "2026-02-11T10:00:00Z",
         "description": "Unexpected GPU VM running for 72 hours with \$450 daily spend"
       },
       "alertContext": {
-        "ResourceId": "/subscriptions/495eb1d8-99ac-40d1-9eaf-082d28b8ac56/resourceGroups/ai-dev-days-hackathon-eu/providers/Microsoft.Compute/virtualMachines/gpu-training-vm",
+        "ResourceId": "/subscriptions/<your-subscription-id>/resourceGroups/ai-dev-days-hackathon-eu/providers/Microsoft.Compute/virtualMachines/gpu-training-vm",
         "costAnomaly": {
           "expectedDailyCost": 12.50,
           "actualDailyCost": 450.00,

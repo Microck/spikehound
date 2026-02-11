@@ -10,8 +10,7 @@ Use this checklist to produce a consistent, high-quality 2-minute demo video for
 
 - [ ] **Azure CLI authenticated**
   - Verify: `az account show` shows correct subscription
-  - User: `marcos.jaen.lego@gmail.com`
-  - Subscription: `495eb1d8-99ac-40d1-9eaf-082d28b8ac56`
+  - Optional: `az account show --query '{user:user.name, subscription:id}' -o json`
 
 - [ ] **TriageForge server is running**
   - Verify: `curl http://localhost:8000/health` returns `{"ok":true}`

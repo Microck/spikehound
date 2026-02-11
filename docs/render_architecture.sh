@@ -16,40 +16,46 @@ echo "=========================================="
 echo "Rendering Architecture Diagram"
 echo "=========================================="
 
-# Check if Mermaid CLI is available via npx
-if command -v npx &>/dev/null; then
-  echo "Found: npx (using npm/npx)"
-  echo ""
-
-  # Render with npx mermaid-cli
+render_with_npx() {
   npx -y @mermaid-js/mermaid-cli -i docs/architecture.mmd -o docs/architecture.png
+}
 
-  if [[ $? -eq 0 ]]; then
-    echo "✓ Architecture diagram rendered to docs/architecture.png"
-  else
-    echo "✗ Failed to render with npx mermaid-cli"
-    exit 1
-  fi
-
-# Fallback: Check if Docker is available
-elif command -v docker &>/dev/null; then
-  echo "Found: Docker (using containerized mermaid-cli)"
-  echo ""
-
-  # Render with docker
+render_with_docker() {
   docker run --rm \
     -u "$(id -u):$(id -g)" \
     -v "$PWD:/data" \
     minlag/mermaid-cli \
     -i /data/docs/architecture.mmd \
     -o /data/docs/architecture.png
+}
 
-  if [[ $? -eq 0 ]]; then
-    echo "✓ Architecture diagram rendered to docs/architecture.png"
+if command -v npx &>/dev/null; then
+  echo "Found: npx (using npm/npx)"
+  echo ""
+
+  echo "+ npx -y @mermaid-js/mermaid-cli -i docs/architecture.mmd -o docs/architecture.png"
+  if render_with_npx; then
+    echo "✓ Architecture diagram rendered to docs/architecture.png (npx)"
   else
-    echo "✗ Failed to render with docker mermaid-cli"
-    exit 1
+    echo "✗ npx render failed"
+    if command -v docker &>/dev/null; then
+      echo ""
+      echo "Found: Docker (falling back to containerized mermaid-cli)"
+      echo "+ docker run --rm -u \"$(id -u):$(id -g)\" -v \"$PWD:/data\" minlag/mermaid-cli -i /data/docs/architecture.mmd -o /data/docs/architecture.png"
+      render_with_docker
+      echo "✓ Architecture diagram rendered to docs/architecture.png (docker fallback)"
+    else
+      echo "No Docker available for fallback."
+      exit 1
+    fi
   fi
+
+elif command -v docker &>/dev/null; then
+  echo "Found: Docker (using containerized mermaid-cli)"
+  echo ""
+  echo "+ docker run --rm -u \"$(id -u):$(id -g)\" -v \"$PWD:/data\" minlag/mermaid-cli -i /data/docs/architecture.mmd -o /data/docs/architecture.png"
+  render_with_docker
+  echo "✓ Architecture diagram rendered to docs/architecture.png (docker)"
 
 else
   echo ""
@@ -73,6 +79,12 @@ else
   echo "  Render docs/architecture.mmd to PNG manually"
   echo "  Save as: docs/architecture.png"
   echo ""
+  exit 1
+fi
+
+if [[ ! -s docs/architecture.png ]]; then
+  echo ""
+  echo "ERROR: docs/architecture.png was not created or is empty"
   exit 1
 fi
 

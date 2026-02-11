@@ -18,6 +18,8 @@ TriageForge receives Azure Monitor cost alerts and runs a parallel investigation
 
 ## Architecture
 
+![TriageForge Architecture](docs/architecture.png)
+
 ```
 Azure Monitor Alert
        ↓

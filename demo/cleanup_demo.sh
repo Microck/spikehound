@@ -7,22 +7,38 @@
 #
 # This script stops the VM and removes demo tags to reset state.
 
-set -e
+set -euo pipefail
+
+usage() {
+  echo "Usage: bash demo/cleanup_demo.sh --vm-name <name> --resource-group <name>"
+}
+
+run() {
+  echo "+ $*"
+  "$@"
+}
+
+VM_NAME=""
+RESOURCE_GROUP=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --vm-name)
-      VM_NAME="$2"
+      VM_NAME="${2:-}"
       shift 2
       ;;
     --resource-group)
-      RESOURCE_GROUP="$2"
+      RESOURCE_GROUP="${2:-}"
       shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
       ;;
     *)
       echo "Unknown option: $1"
-      echo "Usage: bash demo/cleanup_demo.sh --vm-name <name> --resource-group <name>"
+      usage
       exit 1
       ;;
   esac
@@ -31,7 +47,7 @@ done
 # Validate required arguments
 if [[ -z "$VM_NAME" || -z "$RESOURCE_GROUP" ]]; then
   echo "Error: Missing required arguments"
-  echo "Usage: bash demo/cleanup_demo.sh --vm-name <name> --resource-group <name>"
+  usage
   exit 1
 fi
 
@@ -44,21 +60,34 @@ echo ""
 
 # Check if Azure CLI is authenticated
 echo "Checking Azure CLI authentication..."
+if ! command -v az &>/dev/null; then
+  echo "Error: az (Azure CLI) not found on PATH. Install Azure CLI first."
+  exit 1
+fi
+
 if ! az account show &>/dev/null; then
   echo "Error: Azure CLI is not authenticated."
   echo "Run: az login"
   exit 1
 fi
-echo "✓ Authenticated as $(az account show --query user.name -o tsv)"
+echo "✓ Azure CLI authenticated"
 echo ""
+
+POWER_STATE_CMD=(az vm show -d --name "$VM_NAME" --resource-group "$RESOURCE_GROUP" --query powerState -o tsv)
+echo "+ ${POWER_STATE_CMD[*]}"
+
+get_power_state() {
+  local status
+  status=$("${POWER_STATE_CMD[@]}" 2>/dev/null || true)
+  if [[ -z "$status" ]]; then
+    status="unknown"
+  fi
+  echo "$status"
+}
 
 # Get current VM status
 echo "Checking current VM status..."
-VM_STATUS=$(az vm show \
-  --name "$VM_NAME" \
-  --resource-group "$RESOURCE_GROUP" \
-  --query powerState \
-  -o tsv 2>/dev/null || echo "unknown")
+VM_STATUS=$(get_power_state)
 
 echo "Current status: $VM_STATUS"
 echo ""
@@ -66,7 +95,7 @@ echo ""
 # Stop the VM if running
 if [[ "$VM_STATUS" == "VM running" ]]; then
   echo "Stopping VM..."
-  az vm deallocate \
+  run az vm deallocate \
     --name "$VM_NAME" \
     --resource-group "$RESOURCE_GROUP" \
     --no-wait
@@ -82,12 +111,12 @@ echo ""
 
 # Remove demo tags
 echo "Removing demo tags..."
-az vm update \
+run az vm update \
   --name "$VM_NAME" \
   --resource-group "$RESOURCE_GROUP" \
   --remove tags.demo \
-  --remove tags.demo-scenario \
-  --remove tags.demo-date
+  --remove tags.demo_scenario \
+  --remove tags.demo_date
 
 echo "✓ Demo tags removed"
 echo ""
@@ -96,7 +125,11 @@ echo ""
 echo "=========================================="
 echo "VM Details"
 echo "=========================================="
-az vm show --name "$VM_NAME" --resource-group "$RESOURCE_GROUP" --query '[{name: name, size: hardwareProfile.vmSize, powerState: powerState, tags: tags}]' -o json
+run az vm show -d \
+  --name "$VM_NAME" \
+  --resource-group "$RESOURCE_GROUP" \
+  --query '[{name: name, size: hardwareProfile.vmSize, powerState: powerState, tags: tags}]' \
+  -o json
 echo ""
 
 echo "=========================================="
