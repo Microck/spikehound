@@ -4,43 +4,51 @@
 **Phase:** 04-human-loop
 **Status:** Incomplete
 
-Complete these items for Slack notification delivery. Claude implemented the webhook sender and formatter; these steps require your Slack workspace access.
+Complete these items for Slack notification delivery and interactive approval buttons. Claude implemented the webhook sender, button formatting, and action endpoint; these steps require Slack workspace access.
 
 ## Environment Variables
 
 | Status | Variable | Source | Add to |
 |--------|----------|--------|--------|
-| [ ] | `SLACK_WEBHOOK_URL` | Slack Workspace -> Apps -> Incoming Webhooks -> Copy Webhook URL | `.env` |
+| [ ] | `SLACK_WEBHOOK_URL` | Slack App -> Incoming Webhooks -> Copy Webhook URL | `.env` |
+| [ ] | `SLACK_SIGNING_SECRET` | Slack App -> Basic Information -> App Credentials -> Signing Secret | `.env` |
+| [ ] | `SLACK_BOT_TOKEN` | Slack App -> OAuth & Permissions -> Bot User OAuth Token | `.env` |
 
 ## Account Setup
 
-- [ ] **Create or open a Slack app with Incoming Webhooks enabled**
+- [ ] **Create or open a Slack app for TriageForge**
   - URL: https://api.slack.com/apps
-  - Skip if: You already have an app configured for this project/channel
+  - Skip if: You already have an app used for this incident channel
 
 ## Dashboard Configuration
 
-- [ ] **Enable Incoming Webhooks**
-  - Location: Slack App Configuration -> Features -> Incoming Webhooks
-  - Set to: Enabled
+- [ ] **Enable Incoming Webhooks and add a channel webhook**
+  - Location: Slack App -> Features -> Incoming Webhooks
+  - Set to: Enabled, then Add New Webhook to Workspace
+  - Notes: Copy generated webhook URL to `SLACK_WEBHOOK_URL`
 
-- [ ] **Add webhook to the incident channel**
-  - Location: Slack App Configuration -> Incoming Webhooks -> Add New Webhook to Workspace
-  - Set to: Incident response channel used by your team
-  - Notes: Copy the generated webhook URL into `SLACK_WEBHOOK_URL`
+- [ ] **Enable Interactivity & Shortcuts for button callbacks**
+  - Location: Slack App -> Features -> Interactivity & Shortcuts
+  - Request URL: `https://<your-public-domain>/webhooks/slack/actions`
+  - Notes: Localhost will not receive Slack callbacks; use a reachable dev tunnel/domain
+
+- [ ] **Install/Reinstall app to workspace after permission changes**
+  - Location: Slack App -> OAuth & Permissions
+  - Notes: Confirm bot token value used for `SLACK_BOT_TOKEN`
 
 ## Verification
 
 After completing setup, verify with:
 
 ```bash
-grep SLACK_WEBHOOK_URL .env
+grep -E "SLACK_WEBHOOK_URL|SLACK_SIGNING_SECRET|SLACK_BOT_TOKEN" .env
 . .venv/bin/activate && PYTHONPATH=src python3 -c "from integrations.slack import send_webhook; send_webhook('TriageForge Slack setup verification')"
 ```
 
 Expected results:
-- `SLACK_WEBHOOK_URL` is present in `.env`
+- All three `SLACK_*` values are present in `.env`
 - Slack channel receives the verification message
+- Slack button clicks are delivered to `/webhooks/slack/actions` once app interactivity is enabled
 
 ---
 
