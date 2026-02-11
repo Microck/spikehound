@@ -9,6 +9,9 @@ from azure.auth import get_credential
 from azure.auth import get_subscription_id
 from azure.cost_management import query_last_7_days_costs_by_resource
 from azure.cost_management import rows_to_cost_items
+from models.agent_protocol import AgentName
+from models.agent_protocol import AgentResult
+from models.agent_protocol import AgentStatus
 from models.findings import CostFinding
 from models.findings import InvestigationFindings
 
@@ -17,18 +20,45 @@ class CostAnalystAgent:
     def __init__(self, *, top_n: int = 5) -> None:
         self.top_n = top_n
 
-    def run(self, alert_payload: Mapping[str, Any]) -> InvestigationFindings:
+    def run(
+        self,
+        alert_payload: Mapping[str, Any],
+        hints: Mapping[str, Any] | None = None,
+    ) -> AgentResult[InvestigationFindings]:
+        del hints
         alert_id = self._extract_alert_id(alert_payload)
-        received_at = datetime.now(timezone.utc)
+        started_at = datetime.now(timezone.utc)
+        received_at = started_at
 
         try:
             subscription_id = get_subscription_id()
         except RuntimeError as exc:
-            return InvestigationFindings(
+            note = str(exc)
+            findings = InvestigationFindings(
                 alert_id=alert_id,
                 received_at=received_at,
                 cost_findings=[],
-                notes=str(exc),
+                notes=note,
+            )
+            return self._build_result(
+                status=AgentStatus.DEGRADED,
+                started_at=started_at,
+                findings=findings,
+                errors=[note],
+            )
+        except Exception as exc:  # pragma: no cover - defensive fallback
+            note = f"Cost configuration failed: {exc}"
+            findings = InvestigationFindings(
+                alert_id=alert_id,
+                received_at=received_at,
+                cost_findings=[],
+                notes=note,
+            )
+            return self._build_result(
+                status=AgentStatus.ERROR,
+                started_at=started_at,
+                findings=findings,
+                errors=[note],
             )
 
         try:
@@ -37,19 +67,49 @@ class CostAnalystAgent:
             )
             cost_items = rows_to_cost_items(result)
         except Exception as exc:
-            return InvestigationFindings(
+            note = f"Unable to query Azure Cost Management: {exc}"
+            findings = InvestigationFindings(
                 alert_id=alert_id,
                 received_at=received_at,
                 cost_findings=[],
-                notes=f"Unable to query Azure Cost Management: {exc}",
+                notes=note,
+            )
+            return self._build_result(
+                status=AgentStatus.ERROR,
+                started_at=started_at,
+                findings=findings,
+                errors=[note],
             )
 
         findings = self._to_findings(cost_items)
-        return InvestigationFindings(
+        investigation_findings = InvestigationFindings(
             alert_id=alert_id,
             received_at=received_at,
             cost_findings=findings,
             notes="",
+        )
+        return self._build_result(
+            status=AgentStatus.OK,
+            started_at=started_at,
+            findings=investigation_findings,
+            errors=[],
+        )
+
+    def _build_result(
+        self,
+        *,
+        status: AgentStatus,
+        started_at: datetime,
+        findings: InvestigationFindings,
+        errors: list[str],
+    ) -> AgentResult[InvestigationFindings]:
+        return AgentResult[InvestigationFindings](
+            agent=AgentName.COST,
+            status=status,
+            started_at=started_at,
+            finished_at=datetime.now(timezone.utc),
+            data=findings,
+            errors=errors,
         )
 
     def _extract_alert_id(self, payload: Mapping[str, Any]) -> str:

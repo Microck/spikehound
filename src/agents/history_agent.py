@@ -35,10 +35,10 @@ class HistoryAgent:
     def run(
         self,
         alert_payload: Mapping[str, Any],
-        unified_findings_hint: Mapping[str, Any] | None = None,
+        hints: Mapping[str, Any] | None = None,
     ) -> AgentResult[HistoryFindings]:
         started_at = datetime.now(timezone.utc)
-        query = self._build_query(alert_payload, unified_findings_hint)
+        query = self._build_query(alert_payload, hints)
 
         status = AgentStatus.OK
         errors: list[str] = []
@@ -48,12 +48,16 @@ class HistoryAgent:
             status = AgentStatus.DEGRADED
             errors.extend(setup_issues)
 
+        findings = HistoryFindings(query=query, matches=[], notes="")
         record = self._build_record(alert_payload, query, started_at)
+
         try:
             store.put(record)
         except Exception as exc:
-            status = AgentStatus.DEGRADED
-            errors.append(f"Incident persistence unavailable: {exc}")
+            note = f"Incident persistence unavailable: {exc}"
+            return self._error_result(
+                started_at=started_at, findings=findings, note=note
+            )
 
         matches: list[SimilarIncident] = []
         if not should_return_empty:
@@ -61,10 +65,12 @@ class HistoryAgent:
                 hits = search.search_similar(query, self._top_k)
                 matches = self._to_similar_incidents(hits, store)
             except Exception as exc:
-                status = AgentStatus.DEGRADED
-                errors.append(f"Incident search unavailable: {exc}")
+                note = f"Incident search unavailable: {exc}"
+                return self._error_result(
+                    started_at=started_at, findings=findings, note=note
+                )
 
-        findings = HistoryFindings(
+        final_findings = HistoryFindings(
             query=query,
             matches=matches,
             notes="; ".join(self._unique(errors)),
@@ -75,8 +81,25 @@ class HistoryAgent:
             status=status,
             started_at=started_at,
             finished_at=datetime.now(timezone.utc),
-            data=findings,
+            data=final_findings,
             errors=self._unique(errors),
+        )
+
+    def _error_result(
+        self,
+        *,
+        started_at: datetime,
+        findings: HistoryFindings,
+        note: str,
+    ) -> AgentResult[HistoryFindings]:
+        findings.notes = note
+        return AgentResult[HistoryFindings](
+            agent=AgentName.HISTORY,
+            status=AgentStatus.ERROR,
+            started_at=started_at,
+            finished_at=datetime.now(timezone.utc),
+            data=findings,
+            errors=[note],
         )
 
     def _resolve_dependencies(

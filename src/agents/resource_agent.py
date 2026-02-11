@@ -26,11 +26,18 @@ class ResourceAgent:
     def run(
         self,
         alert_payload: Mapping[str, Any],
-        resource_id: str | None = None,
+        hints: Mapping[str, Any] | None = None,
     ) -> AgentResult[ResourceFindings]:
         started_at = datetime.now(timezone.utc)
+
+        hinted_resource_id: str | None = None
+        if hints:
+            hinted_resource_id_value = hints.get("resource_id")
+            if hinted_resource_id_value is not None:
+                hinted_resource_id = str(hinted_resource_id_value)
+
         target_resource_id = self._resolve_target_resource_id(
-            alert_payload, resource_id
+            alert_payload, hinted_resource_id
         )
 
         if target_resource_id is None:
@@ -65,25 +72,37 @@ class ResourceAgent:
         notes: list[str] = []
         status = AgentStatus.OK
 
-        config = self._query_resource_config(
-            credential=credential,
-            subscription_id=subscription_id,
-            resource_id=target_resource_id,
-        )
-        if config is None:
-            status = AgentStatus.DEGRADED
-            notes.append("Resource Graph returned no matching resource configuration.")
-
         try:
+            config = self._query_resource_config(
+                credential=credential,
+                subscription_id=subscription_id,
+                resource_id=target_resource_id,
+            )
+            if config is None:
+                status = AgentStatus.DEGRADED
+                notes.append(
+                    "Resource Graph returned no matching resource configuration."
+                )
+
             recent_changes = self._query_recent_changes(
                 credential=credential,
                 subscription_id=subscription_id,
                 resource_id=target_resource_id,
             )
         except Exception as exc:  # pragma: no cover - Azure SDK errors vary
-            status = AgentStatus.DEGRADED
-            notes.append(f"Unable to query Azure Activity Logs: {exc}")
-            recent_changes = []
+            note = f"Resource investigation failed: {exc}"
+            findings = ResourceFindings(
+                target_resource_id=target_resource_id,
+                config=None,
+                recent_changes=[],
+                notes=note,
+            )
+            return self._build_result(
+                status=AgentStatus.ERROR,
+                started_at=started_at,
+                findings=findings,
+                errors=[note],
+            )
 
         findings = ResourceFindings(
             target_resource_id=target_resource_id,
@@ -157,14 +176,11 @@ class ResourceAgent:
             ]
         )
 
-        try:
-            rows = query_resources(
-                credential=credential,
-                subscription_ids=[subscription_id],
-                kql=kql,
-            )
-        except Exception:  # pragma: no cover - Azure SDK errors vary
-            return None
+        rows = query_resources(
+            credential=credential,
+            subscription_ids=[subscription_id],
+            kql=kql,
+        )
 
         if not rows:
             return None
