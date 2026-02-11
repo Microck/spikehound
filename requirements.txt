@@ -1,6 +1,9 @@
 azure-ai-projects
 azure-identity
 azure-mgmt-costmanagement
+azure-mgmt-resourcegraph
+azure-mgmt-resource
+azure-mgmt-monitor
 fastapi
 uvicorn[standard]
 pydantic
