@@ -58,8 +58,12 @@ class CoordinatorAgent:
         self, alert_payload: Mapping[str, Any]
     ) -> InvestigationReport:
         received_at = datetime.now(timezone.utc)
-        alert_id = self._extract_alert_id(alert_payload)
-        alert_summary = self._build_alert_summary(alert_payload, alert_id, received_at)
+        investigation_id = self._extract_investigation_id(alert_payload)
+        alert_summary = self._build_alert_summary(
+            alert_payload,
+            investigation_id,
+            received_at,
+        )
 
         investigator_results = await asyncio.gather(
             self._run_agent_with_timeout(
@@ -97,9 +101,9 @@ class CoordinatorAgent:
             hints=diagnosis_result.data,
         )
 
-        self.last_alert_id = alert_id
+        self.last_alert_id = investigation_id
         self.last_received_at = received_at
-        self.alert_history[alert_id] = received_at
+        self.alert_history[investigation_id] = received_at
 
         return InvestigationReport(
             unified_findings=findings,
@@ -211,16 +215,19 @@ class CoordinatorAgent:
     def _build_alert_summary(
         self,
         alert_payload: Mapping[str, Any],
-        alert_id: str,
+        investigation_id: str,
         received_at: datetime,
     ) -> dict[str, Any]:
         summary: dict[str, Any] = {
-            "alert_id": alert_id,
+            "alert_id": investigation_id,
             "received_at": received_at,
         }
         for key in (
             "summary",
             "title",
+            "rule_name",
+            "severity",
+            "fired_date_time",
             "resource_id",
             "resource_name",
             "resource_type",
@@ -232,8 +239,12 @@ class CoordinatorAgent:
         return summary
 
     @staticmethod
-    def _extract_alert_id(alert_payload: Mapping[str, Any]) -> str:
-        alert_id = alert_payload.get("alert_id") or alert_payload.get("id")
+    def _extract_investigation_id(alert_payload: Mapping[str, Any]) -> str:
+        alert_id = (
+            alert_payload.get("alert_id")
+            or alert_payload.get("investigation_id")
+            or alert_payload.get("id")
+        )
         if alert_id is None:
             return "unknown-alert"
         return str(alert_id)

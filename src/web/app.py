@@ -5,6 +5,7 @@ from datetime import timezone
 import json
 import logging
 from typing import Any
+from typing import Mapping
 from urllib.parse import parse_qs
 
 from fastapi import BackgroundTasks
@@ -52,8 +53,12 @@ def health() -> dict[str, bool]:
 
 @app.post("/webhooks/alert", response_model=InvestigationReport)
 async def webhook_alert(payload: dict[str, Any] = Body(...)) -> InvestigationReport:
-    logger.info("webhook_received", extra={"payload": payload})
-    report = await coordinator_agent.handle_alert_async(payload)
+    normalized_payload = normalize_alert_payload(payload)
+    logger.info(
+        "webhook_received",
+        extra={"payload": payload, "normalized_payload": normalized_payload},
+    )
+    report = await coordinator_agent.handle_alert_async(normalized_payload)
     investigation_id = report.unified_findings.alert_id
     latest_reports[investigation_id] = report
     if report.remediation_result.data is not None:
@@ -71,6 +76,108 @@ async def webhook_alert(payload: dict[str, Any] = Body(...)) -> InvestigationRep
         logger.warning("slack_notification_failed", extra={"error": str(exc)})
 
     return report
+
+
+def normalize_alert_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
+    root = dict(payload)
+    data = _as_mapping(root.get("data"))
+    essentials = _as_mapping(data.get("essentials"))
+    alert_context = _as_mapping(data.get("alertContext"))
+
+    alert_id = _first_non_empty_string(
+        root.get("alert_id"),
+        root.get("id"),
+        essentials.get("alertId"),
+        essentials.get("originAlertId"),
+    )
+    rule_name = _first_non_empty_string(
+        root.get("rule_name"),
+        root.get("ruleName"),
+        essentials.get("alertRule"),
+        root.get("summary"),
+        root.get("title"),
+    )
+    severity = _first_non_empty_string(
+        root.get("severity"),
+        essentials.get("severity"),
+        alert_context.get("severity"),
+    )
+    fired_date_time = _first_non_empty_string(
+        root.get("fired_date_time"),
+        root.get("firedDateTime"),
+        essentials.get("firedDateTime"),
+        root.get("timestamp"),
+    )
+    resource_id = _first_non_empty_string(
+        root.get("resource_id"),
+        root.get("resourceId"),
+        _first_string_from_sequence(essentials.get("alertTargetIDs")),
+        alert_context.get("resourceId"),
+        _scan_resource_id(payload),
+    )
+
+    normalized: dict[str, Any] = {
+        "alert_id": alert_id or "unknown-alert",
+        "rule_name": rule_name or "unknown-rule",
+        "severity": severity or "unknown",
+        "fired_date_time": fired_date_time or datetime.now(timezone.utc).isoformat(),
+        "summary": rule_name or "Alert received",
+    }
+    if resource_id is not None:
+        normalized["resource_id"] = resource_id
+    return normalized
+
+
+def _as_mapping(value: Any) -> dict[str, Any]:
+    if isinstance(value, Mapping):
+        return dict(value)
+    return {}
+
+
+def _first_non_empty_string(*values: Any) -> str | None:
+    for value in values:
+        if isinstance(value, str):
+            stripped = value.strip()
+            if stripped:
+                return stripped
+    return None
+
+
+def _first_string_from_sequence(value: Any) -> str | None:
+    if isinstance(value, list):
+        for item in value:
+            if isinstance(item, str):
+                stripped = item.strip()
+                if stripped:
+                    return stripped
+    return None
+
+
+def _scan_resource_id(payload: Any) -> str | None:
+    candidates: list[str] = []
+    _collect_resource_id_candidates(payload, candidates)
+    return _first_non_empty_string(*candidates)
+
+
+def _collect_resource_id_candidates(value: Any, candidates: list[str]) -> None:
+    if isinstance(value, Mapping):
+        for key, child in value.items():
+            key_name = str(key).lower()
+            if key_name in {"resource_id", "resourceid", "resourceuri"} and isinstance(
+                child, str
+            ):
+                candidates.append(child)
+            elif key_name == "id" and isinstance(child, str):
+                if child.lower().startswith("/subscriptions/"):
+                    candidates.append(child)
+
+            if isinstance(child, Mapping) or isinstance(child, list):
+                _collect_resource_id_candidates(child, candidates)
+        return
+
+    if isinstance(value, list):
+        for item in value:
+            _collect_resource_id_candidates(item, candidates)
 
 
 @app.post("/webhooks/slack/actions")
