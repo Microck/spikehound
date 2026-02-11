@@ -1,4 +1,5 @@
 azure-ai-projects
+azure-cosmos
 azure-identity
 azure-mgmt-costmanagement
 azure-mgmt-resourcegraph
