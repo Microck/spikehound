@@ -71,7 +71,7 @@ Each task was committed atomically:
 2. **Task 2: Add Azure AI Search IncidentSearch implementation** - `af35473` (feat)
 3. **Task 3: Implement History Agent (returns AgentResult[HistoryFindings])** - `941c1cf` (feat)
 
-**Plan metadata:** Pending final docs commit after summary/state updates.
+**Plan metadata:** `da26ea5` (docs state+summary+user-setup) and `574c12a` (summary readiness correction).
 
 ## Files Created/Modified
 - `requirements.txt` - Added Cosmos and AI Search SDK dependencies.
