@@ -1,0 +1,2 @@
+# Get this endpoint from Azure AI Foundry / AI Studio project settings.
+azure_ai_project_endpoint: ${AZURE_AI_PROJECT_ENDPOINT}
