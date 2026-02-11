@@ -54,6 +54,40 @@ def format_investigation_report_for_slack(report: Any) -> dict[str, Any]:
                 ),
             },
         },
+        {
+            "type": "actions",
+            "elements": [
+                {
+                    "type": "button",
+                    "action_id": "approve_remediation",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Approve",
+                    },
+                    "style": "primary",
+                    "value": alert_id,
+                },
+                {
+                    "type": "button",
+                    "action_id": "reject_remediation",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Reject",
+                    },
+                    "style": "danger",
+                    "value": alert_id,
+                },
+                {
+                    "type": "button",
+                    "action_id": "investigate_more",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Investigate More",
+                    },
+                    "value": alert_id,
+                },
+            ],
+        },
     ]
 
     return {"text": text, "blocks": blocks}
