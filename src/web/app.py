@@ -6,6 +6,7 @@ from typing import Any
 from fastapi import Body
 from fastapi import FastAPI
 
+from agents.coordinator import CoordinatorAgent
 from web.settings import get_settings
 
 
@@ -15,6 +16,7 @@ logging.basicConfig(level=getattr(logging, settings.log_level.upper(), logging.I
 logger = logging.getLogger("incident-war-room")
 
 app = FastAPI(title="Incident War Room")
+coordinator_agent = CoordinatorAgent()
 
 
 @app.get("/health")
@@ -23,6 +25,7 @@ def health() -> dict[str, bool]:
 
 
 @app.post("/webhooks/alert")
-async def webhook_alert(payload: Any = Body(...)) -> dict[str, bool]:
+async def webhook_alert(payload: dict[str, Any] = Body(...)) -> dict[str, Any]:
     logger.info("webhook_received", extra={"payload": payload})
-    return {"received": True}
+    findings = coordinator_agent.handle_alert(payload)
+    return findings.model_dump(mode="json")
