@@ -17,6 +17,8 @@ class Settings:
 
     azure_subscription_id: str | None
     slack_webhook_url: str | None
+    idempotency_ttl_seconds: int
+    max_agent_retries: int
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -25,7 +27,32 @@ class Settings:
             log_level=os.getenv("LOG_LEVEL", "INFO"),
             azure_subscription_id=os.getenv("AZURE_SUBSCRIPTION_ID") or None,
             slack_webhook_url=os.getenv("SLACK_WEBHOOK_URL") or None,
+            idempotency_ttl_seconds=_parse_int_env(
+                "IDEMPOTENCY_TTL_SECONDS",
+                default=600,
+                minimum=1,
+            ),
+            max_agent_retries=_parse_int_env(
+                "MAX_AGENT_RETRIES",
+                default=1,
+                minimum=0,
+            ),
         )
+
+
+def _parse_int_env(name: str, *, default: int, minimum: int) -> int:
+    raw_value = os.getenv(name)
+    if raw_value is None:
+        return default
+
+    try:
+        parsed = int(raw_value)
+    except ValueError:
+        return default
+
+    if parsed < minimum:
+        return minimum
+    return parsed
 
 
 @lru_cache(maxsize=1)

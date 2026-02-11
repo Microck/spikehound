@@ -23,6 +23,7 @@ from integrations.slack import verify_signature
 from models.approval import ApprovalDecision
 from models.approval import ApprovalRecord
 from models.approval import ApprovalStore
+from models.agent_protocol import AgentResult
 from models.findings import InvestigationReport
 from models.remediation import RemediationPlan
 from web.settings import get_settings
@@ -38,6 +39,17 @@ coordinator_agent = CoordinatorAgent()
 approval_records: ApprovalStore = {}
 latest_reports: dict[str, InvestigationReport] = {}
 latest_remediation_plans: dict[str, RemediationPlan] = {}
+processed_investigations: dict[str, tuple[float, InvestigationReport]] = {}
+
+TRANSIENT_ERROR_MARKERS = (
+    "timeout",
+    "timed out",
+    "network",
+    "connection",
+    "temporarily unavailable",
+    "temporary failure",
+    "reset by peer",
+)
 
 ACTION_DECISION_MAP: dict[str, ApprovalDecision] = {
     "approve_remediation": ApprovalDecision.APPROVE,
@@ -54,17 +66,34 @@ def health() -> dict[str, bool]:
 @app.post("/webhooks/alert", response_model=InvestigationReport)
 async def webhook_alert(payload: dict[str, Any] = Body(...)) -> InvestigationReport:
     normalized_payload = normalize_alert_payload(payload)
+    investigation_id = str(normalized_payload["alert_id"])
     logger.info(
         "webhook_received",
         extra={"payload": payload, "normalized_payload": normalized_payload},
     )
-    report = await coordinator_agent.handle_alert_async(normalized_payload)
-    investigation_id = report.unified_findings.alert_id
+
+    now_epoch = datetime.now(timezone.utc).timestamp()
+    _prune_expired_processed_investigations(now_epoch)
+    cached_report = _get_cached_report(investigation_id, now_epoch)
+    if cached_report is not None:
+        logger.info(
+            "webhook_duplicate_returning_cached_report",
+            extra={"investigation_id": investigation_id},
+        )
+        latest_reports[investigation_id] = cached_report
+        if cached_report.remediation_result.data is not None:
+            latest_remediation_plans[investigation_id] = (
+                cached_report.remediation_result.data
+            )
+        return cached_report
+
+    report = await _run_coordinator_with_retries(normalized_payload)
     latest_reports[investigation_id] = report
     if report.remediation_result.data is not None:
         latest_remediation_plans[investigation_id] = report.remediation_result.data
     else:
         latest_remediation_plans.pop(investigation_id, None)
+    processed_investigations[investigation_id] = (now_epoch, report)
 
     try:
         slack_message = format_investigation_report_for_slack(report)
@@ -76,6 +105,78 @@ async def webhook_alert(payload: dict[str, Any] = Body(...)) -> InvestigationRep
         logger.warning("slack_notification_failed", extra={"error": str(exc)})
 
     return report
+
+
+async def _run_coordinator_with_retries(
+    normalized_payload: Mapping[str, Any],
+) -> InvestigationReport:
+    report = await coordinator_agent.handle_alert_async(normalized_payload)
+    for attempt in range(1, settings.max_agent_retries + 1):
+        transient_messages = _transient_error_messages(report)
+        if not transient_messages:
+            break
+
+        logger.warning(
+            "retrying_after_transient_agent_errors",
+            extra={
+                "attempt": attempt,
+                "max_retries": settings.max_agent_retries,
+                "alert_id": normalized_payload.get("alert_id"),
+                "errors": transient_messages,
+            },
+        )
+        report = await coordinator_agent.handle_alert_async(normalized_payload)
+
+    return report
+
+
+def _transient_error_messages(report: InvestigationReport) -> list[str]:
+    transient_errors: list[str] = []
+    for result in _iter_agent_results(report):
+        if result.status.value != "error":
+            continue
+        for error in result.errors:
+            if _looks_transient_error(error):
+                transient_errors.append(error)
+    return transient_errors
+
+
+def _iter_agent_results(report: InvestigationReport) -> list[AgentResult[Any]]:
+    results = list(report.unified_findings.results.values())
+    results.append(report.diagnosis_result)
+    results.append(report.remediation_result)
+    return results
+
+
+def _looks_transient_error(message: str) -> bool:
+    lowered = message.lower()
+    return any(marker in lowered for marker in TRANSIENT_ERROR_MARKERS)
+
+
+def _get_cached_report(
+    investigation_id: str,
+    now_epoch: float,
+) -> InvestigationReport | None:
+    cached_entry = processed_investigations.get(investigation_id)
+    if cached_entry is None:
+        return None
+
+    cached_at, cached_report = cached_entry
+    if now_epoch - cached_at > settings.idempotency_ttl_seconds:
+        processed_investigations.pop(investigation_id, None)
+        return None
+    return cached_report
+
+
+def _prune_expired_processed_investigations(now_epoch: float) -> None:
+    expiration_cutoff = now_epoch - settings.idempotency_ttl_seconds
+    expired_investigations = [
+        investigation_id
+        for investigation_id, (cached_at, _) in processed_investigations.items()
+        if cached_at < expiration_cutoff
+    ]
+    for investigation_id in expired_investigations:
+        processed_investigations.pop(investigation_id, None)
 
 
 def normalize_alert_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
