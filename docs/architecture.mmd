@@ -1,0 +1,90 @@
+graph TB
+    subgraph "Azure Cloud"
+        A[Azure Monitor<br/>Cost Alert]
+    end
+
+    subgraph "TriageForge"
+        direction TB
+        C[Coordinator<br/>Webhook<br/>/webhooks/alert]
+
+        subgraph "Parallel Investigation"
+            direction LR
+            CA[Cost Analyst<br/>Cost Management API]
+            RA[Resource Agent<br/>Resource Graph<br/>Activity Logs]
+            HA[History Agent<br/>Azure AI Search<br/>Cosmos DB]
+
+            CA -->|top_cost_driver| CF[Cost Findings]
+            RA -->|config_activity| RF[Resource Findings]
+            HA -->|similar_incidents| HF[History Findings]
+        end
+
+        U[Unified Findings<br/>Coordinator Aggregation]
+        CF & RF & HF --> U
+    end
+
+    subgraph "Analysis"
+        D[Diagnosis Agent<br/>Azure AI Foundry]
+        D -->|root_cause| RH[Root Cause<br/>85% Confidence]
+    end
+
+    subgraph "Remediation"
+        R[Remediation Agent<br/>Action Planner]
+        RH --> R
+        R -->|requires_approval| RP[Remediation Plan<br/>human_approval_required=true]
+    end
+
+    subgraph "Human Loop"
+        direction TB
+        SN[Slack Notification<br/>Incoming Webhook]
+        RP --> SN
+
+        subgraph "Slack Interaction"
+            direction LR
+            BA[Approve Button<br/>primary]
+            BR[Reject Button<br/>danger]
+            BI[Investigate Button<br/>default]
+        end
+
+        SN --> BA
+        SN --> BR
+        SN --> BI
+
+        subgraph "Decision Processing"
+            direction TB
+            AD[Approval Record<br/>in-memory store]
+            BA -->|approve| AD
+            BR -->|reject| AD
+            BI -->|investigate| AD
+        end
+    end
+
+    subgraph "Execution"
+        direction TB
+        AD -->|gate| AE[Remediation Engine<br/>Approval Gate]
+        AE -->|executed| EX[Azure Compute<br/>stop_vm]
+
+        subgraph "Azure Resource"
+            VM[GPU VM<br/>gpu-training-vm]
+            EX --> VM
+        end
+    end
+
+    subgraph "Follow-up"
+        direction TB
+        FS[Follow-up Slack<br/>Execution Outcome]
+        EX -->|success| FS
+    end
+
+    %% Flow connections
+    A --> C
+    C --> U
+    U --> D
+    D --> R
+    RP --> SN
+
+    classDef approved fill:#90EE90,stroke:#333,stroke-width:2px
+    classDef rejected fill:#F44336,stroke:#333,stroke-width:2px
+
+    style AE stroke:#009688,stroke-width:3px
+    style EX fill:#e6f3ff,stroke:#0066cc
+    style FS fill:#4CAF50,stroke:#2E7D32
