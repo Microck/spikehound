@@ -34,9 +34,13 @@ def test_webhook_alert_returns_structured_findings(monkeypatch) -> None:
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["alert_id"] == "alert-123"
-    assert "received_at" in payload
-    assert payload["notes"] == "stubbed"
-    assert payload["cost_findings"][0]["resource_id"].endswith("/vm1")
-    assert payload["cost_findings"][0]["cost"] == 125.5
-    assert payload["cost_findings"][0]["currency"] == "USD"
+    unified_findings = payload["unified_findings"]
+
+    assert unified_findings["alert_id"] == "alert-123"
+    assert "received_at" in unified_findings
+    assert unified_findings["notes"] == "stubbed"
+    assert unified_findings["cost_findings"][0]["resource_id"].endswith("/vm1")
+    assert unified_findings["cost_findings"][0]["cost"] == 125.5
+    assert unified_findings["cost_findings"][0]["currency"] == "USD"
+    assert payload["diagnosis_result"]["agent"] == "diagnosis"
+    assert payload["remediation_result"]["agent"] == "remediation"

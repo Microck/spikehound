@@ -7,6 +7,7 @@ from fastapi import Body
 from fastapi import FastAPI
 
 from agents.coordinator import CoordinatorAgent
+from models.findings import InvestigationReport
 from web.settings import get_settings
 
 
@@ -24,8 +25,8 @@ def health() -> dict[str, bool]:
     return {"ok": True}
 
 
-@app.post("/webhooks/alert")
-async def webhook_alert(payload: dict[str, Any] = Body(...)) -> dict[str, Any]:
+@app.post("/webhooks/alert", response_model=InvestigationReport)
+async def webhook_alert(payload: dict[str, Any] = Body(...)) -> InvestigationReport:
     logger.info("webhook_received", extra={"payload": payload})
-    findings = await coordinator_agent.handle_alert_async(payload)
-    return findings.model_dump(mode="json")
+    report = await coordinator_agent.handle_alert_async(payload)
+    return report

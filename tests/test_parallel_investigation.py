@@ -10,15 +10,24 @@ import pytest
 
 from agents.coordinator import CoordinatorAgent
 from agents.cost_analyst import CostAnalystAgent
+from agents.diagnosis_agent import DiagnosisAgent
 from agents.history_agent import HistoryAgent
+from agents.remediation_agent import RemediationAgent
 from agents.resource_agent import ResourceAgent
 from models.agent_protocol import AgentName
 from models.agent_protocol import AgentResult
 from models.agent_protocol import AgentStatus
+from models.diagnosis import Diagnosis
+from models.diagnosis import RootCauseHypothesis
 from models.findings import CostFinding
+from models.findings import InvestigationReport
 from models.findings import InvestigationFindings
 from models.findings import UnifiedFindings
 from models.history_findings import HistoryFindings
+from models.remediation import RemediationAction
+from models.remediation import RemediationActionType
+from models.remediation import RemediationPlan
+from models.remediation import RemediationRiskLevel
 from models.resource_findings import ResourceFindings
 import web.app as web_app
 
@@ -93,6 +102,42 @@ def test_coordinator_starts_agents_in_parallel(monkeypatch: pytest.MonkeyPatch) 
             HistoryFindings(query="cost anomaly", matches=[], notes=""),
         ),
     )
+    monkeypatch.setattr(
+        DiagnosisAgent,
+        "run",
+        lambda self, unified_findings: _agent_result(
+            AgentName.DIAGNOSIS,
+            Diagnosis(
+                hypothesis=RootCauseHypothesis(
+                    title="GPU VM left running",
+                    explanation="Detected running VM with no shutdown schedule.",
+                    evidence=["vm-cost has high spend"],
+                ),
+                confidence=80,
+                alternatives=["Legitimate batch workload"],
+                risks=["Stopping VM interrupts active jobs"],
+            ),
+        ),
+    )
+    monkeypatch.setattr(
+        RemediationAgent,
+        "run",
+        lambda self, unified_findings, diagnosis: _agent_result(
+            AgentName.REMEDIATION,
+            RemediationPlan(
+                summary="Stop VM after approval",
+                actions=[
+                    RemediationAction(
+                        type=RemediationActionType.STOP_VM,
+                        target_resource_id=resource_id,
+                        parameters={"mode": "deallocate"},
+                        risk_level=RemediationRiskLevel.MEDIUM,
+                    )
+                ],
+                rollback_notes="Restart VM if jobs were interrupted.",
+            ),
+        ),
+    )
 
     coordinator = CoordinatorAgent(per_agent_timeout_seconds=20.0)
     execution: dict[str, Any] = {}
@@ -132,8 +177,10 @@ def test_coordinator_starts_agents_in_parallel(monkeypatch: pytest.MonkeyPatch) 
         f"Coordinator raised unexpected error: {execution['error']}"
     )
 
-    findings = execution["result"]
-    assert isinstance(findings, UnifiedFindings)
+    report = execution["result"]
+    assert isinstance(report, InvestigationReport)
+
+    findings = report.unified_findings
     assert set(findings.results.keys()) == {
         AgentName.COST,
         AgentName.RESOURCE,
@@ -142,6 +189,8 @@ def test_coordinator_starts_agents_in_parallel(monkeypatch: pytest.MonkeyPatch) 
     assert findings.results[AgentName.COST].status == AgentStatus.OK
     assert findings.results[AgentName.RESOURCE].status == AgentStatus.OK
     assert findings.results[AgentName.HISTORY].status == AgentStatus.OK
+    assert report.diagnosis_result.agent == AgentName.DIAGNOSIS
+    assert report.remediation_result.agent == AgentName.REMEDIATION
 
 
 def test_webhook_returns_unified_findings_schema(
@@ -179,8 +228,40 @@ def test_webhook_returns_unified_findings_schema(
         alert_summary={"alert_id": "alert-123"},
     )
 
-    async def fake_handle_alert_async(_: dict[str, object]) -> UnifiedFindings:
-        return merged
+    report = InvestigationReport(
+        unified_findings=merged,
+        diagnosis_result=_agent_result(
+            AgentName.DIAGNOSIS,
+            Diagnosis(
+                hypothesis=RootCauseHypothesis(
+                    title="Recurring VM overrun",
+                    explanation="Matches prior incident pattern.",
+                    evidence=["high spend on vm1"],
+                ),
+                confidence=55,
+                alternatives=["Legitimate peak workload"],
+                risks=["Stopping service may affect users"],
+            ),
+        ),
+        remediation_result=_agent_result(
+            AgentName.REMEDIATION,
+            RemediationPlan(
+                summary="Notify owner for approval",
+                actions=[
+                    RemediationAction(
+                        type=RemediationActionType.NOTIFY_OWNER,
+                        target_resource_id="/subscriptions/sub-123/resourceGroups/rg/providers/Microsoft.Compute/virtualMachines/vm1",
+                        parameters={"channel": "incident-war-room"},
+                        risk_level=RemediationRiskLevel.LOW,
+                    )
+                ],
+                rollback_notes="No infrastructure rollback needed.",
+            ),
+        ),
+    )
+
+    async def fake_handle_alert_async(_: dict[str, object]) -> InvestigationReport:
+        return report
 
     monkeypatch.setattr(
         web_app.coordinator_agent, "handle_alert_async", fake_handle_alert_async
@@ -191,8 +272,14 @@ def test_webhook_returns_unified_findings_schema(
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["alert_summary"]["alert_id"] == "alert-123"
-    assert set(payload["results"].keys()) == {"cost", "resource", "history"}
-    assert payload["results"]["cost"]["status"] == "ok"
-    assert payload["results"]["resource"]["status"] == "ok"
-    assert payload["results"]["history"]["status"] == "ok"
+    assert payload["unified_findings"]["alert_summary"]["alert_id"] == "alert-123"
+    assert set(payload["unified_findings"]["results"].keys()) == {
+        "cost",
+        "resource",
+        "history",
+    }
+    assert payload["unified_findings"]["results"]["cost"]["status"] == "ok"
+    assert payload["unified_findings"]["results"]["resource"]["status"] == "ok"
+    assert payload["unified_findings"]["results"]["history"]["status"] == "ok"
+    assert payload["diagnosis_result"]["agent"] == "diagnosis"
+    assert payload["remediation_result"]["agent"] == "remediation"
