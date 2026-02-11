@@ -27,5 +27,5 @@ def health() -> dict[str, bool]:
 @app.post("/webhooks/alert")
 async def webhook_alert(payload: dict[str, Any] = Body(...)) -> dict[str, Any]:
     logger.info("webhook_received", extra={"payload": payload})
-    findings = coordinator_agent.handle_alert(payload)
+    findings = await coordinator_agent.handle_alert_async(payload)
     return findings.model_dump(mode="json")
