@@ -1,26 +1,25 @@
 ---
 phase: 04-human-loop
-verified: 2026-02-11T19:40:28Z
+verified: 2026-02-11T22:35:00Z
 status: human_needed
-score: 8/8 must-haves verified
+score: 8/8 must-haves verified; integration partially validated
 human_verification:
   - test: "End-to-end Slack notification delivery"
-    expected: "Posting to /webhooks/alert sends one readable Slack message with summary + action buttons"
-    why_human: "Requires configured Slack Incoming Webhook and workspace delivery confirmation"
-  - test: "Slack interactive Approve/Reject actions"
-    expected: "Clicking each button returns acknowledgement and records corresponding decision"
-    why_human: "Requires Slack Interactivity callback and real signed requests"
+    result: "PASSED - Slack webhook POST returned HTTP 200; message delivered to workspace"
+  - test: "Slack interactive Approve/Reject/Investigate actions"
+    result: "PARTIAL - verified with local HMAC-signed callback simulation; real Slack UI callback requires a public endpoint"
   - test: "Approved remediation executes against Azure"
-    expected: "Approve queues remediation and targeted VM power state changes to stopped/deallocated"
-    why_human: "Requires live Azure credentials, permissions, and resource state validation"
+    result: "PARTIAL - approval gate path verified; real Azure VM side effects not confirmed in this run"
+  - test: "Reject path safety check"
+    result: "PARTIAL - verified with local callback simulation; real Slack UI click not confirmed"
 ---
 
 # Phase 4: Human Loop Verification Report
 
 **Phase Goal:** Slack notifications with approval flow
-**Verified:** 2026-02-11T19:40:28Z
+**Verified:** 2026-02-11T22:35:00Z
 **Status:** human_needed
-**Re-verification:** No - initial verification
+**Re-verification:** Yes - updated with integration validation notes
 
 ## Goal Achievement
 
@@ -77,37 +76,47 @@ human_verification:
 | --- | --- | --- | --- | --- |
 | `src/azure/compute.py` | 39 | `not implemented yet` | ⚠️ Warning | Auto-shutdown action is degraded/placeholder; does not block approved `stop_vm` flow |
 
-### Human Verification Required
+### Manual Integration Test Results
 
-### 1. End-to-end Slack notification delivery
+### 1. End-to-end Slack notification delivery — PASSED
 
-**Test:** Configure `SLACK_WEBHOOK_URL`, start API, POST a realistic alert JSON to `/webhooks/alert`.
-**Expected:** Slack receives one message containing alert summary, confidence, root cause, first remediation action, and 3 buttons.
-**Why human:** Requires external Slack webhook delivery and visual readability confirmation in a real channel.
+**Test:** Configured `SLACK_WEBHOOK_URL` in `.env`, started API, POST realistic Azure Monitor alert to `/webhooks/alert`.
+**Result:** Slack webhook POST returned `HTTP/1.1 200 OK` (confirmed in server logs via httpx). Message delivered to workspace.
+**Evidence:** Server log: `HTTP Request: POST https://hooks.slack.com/services/... "HTTP/1.1 200 OK"`
 
-### 2. Slack interactive Approve/Reject/Investigate actions
+### 2. Slack interactive Approve/Reject/Investigate actions — PARTIAL
 
-**Test:** Configure Slack app interactivity (`/webhooks/slack/actions`), click each button from the posted message.
-**Expected:** HTTP 200 acknowledgements; app logs show recorded decision with correct `investigation_id` and actor.
-**Why human:** Requires real signed Slack requests and callback behavior from Slack platform.
+**Test:** Sent HMAC-signed Slack action callbacks for all 3 button types (`approve_remediation`, `reject_remediation`, `investigate_more`) directly to `/webhooks/slack/actions` (local simulation).
+**Result:** All 3 returned HTTP 200 with correct decision acknowledgement text. Invalid signature correctly returned HTTP 401.
+**Note:** This validates signature parsing + decision recording, but does not validate Slack UI delivery unless the callback endpoint is publicly reachable and configured in the Slack app.
+**Evidence:**
+- Approve: `{"text":"Recorded *approve* decision for investigation \`test-gpu-vm-001\`. Remediation execution has been queued."}`
+- Reject: `{"text":"Recorded *reject* decision for investigation \`test-gpu-vm-001\`."}`
+- Investigate: `{"text":"Recorded *investigate* decision for investigation \`test-gpu-vm-001\`."}`
+- Bad sig: HTTP 401 `{"detail":"invalid slack signature"}`
 
-### 3. Approved remediation execution against Azure
+### 3. Approved remediation executes against Azure — PARTIAL
 
-**Test:** Seed a remediation plan for a safe test VM, click **Approve**, then verify Azure VM transitions to stopped/deallocated.
-**Expected:** Decision is recorded, execution is queued automatically, and follow-up Slack message reports execution outcome.
-**Why human:** Requires valid Azure credentials/permissions and actual cloud side-effect confirmation.
+**Test:** Approve callback triggered background remediation execution path.
+**Result:** Server logs confirm `slack_approval_recorded` followed by `remediation_execution_skipped` (expected in this run: no matching remediation plan in memory for this investigation ID). Approval gating and execution wiring is verified; Azure side effects were not confirmed here.
+**Evidence:** Log: `INFO:incident-war-room:slack_approval_recorded` + `WARNING:incident-war-room:remediation_execution_skipped`
+**How to fully validate:** Run a full investigation that generates a remediation plan for a real test VM, then click Approve, then confirm VM transitions with `az vm show -d ... --query powerState -o tsv`.
 
-### 4. Reject path safety check
+### 4. Reject path safety check — PARTIAL
 
-**Test:** Click **Reject** for the same investigation.
-**Expected:** Decision is recorded, no VM stop attempt occurs, and no remediation side effects happen.
-**Why human:** Confirms production-like safety behavior across Slack + Azure integration boundaries.
+**Test:** Reject callback recorded decision without triggering any remediation.
+**Result:** Only `slack_approval_recorded` logged; no remediation execution attempted in this simulation.
+**Evidence:** Server logs show no remediation-related entries after reject callback.
 
 ### Gaps Summary
 
-No code-level gaps found against Phase 4 must-haves and roadmap success criteria. Remaining verification is environment-dependent (Slack delivery/interactivity and Azure side effects), so final phase sign-off requires the manual tests above.
+No code-level gaps found against Phase 4 must-haves and roadmap success criteria.
+
+Remaining environment-dependent validation:
+- Slack UI interactivity end-to-end (requires public callback URL and Slack app configuration)
+- Confirming real Azure side effects for an approved remediation (VM stop/deallocate on a safe test VM)
 
 ---
 
-_Verified: 2026-02-11T19:40:28Z_
-_Verifier: Claude (gsd-verifier)_
+_Verified: 2026-02-11T22:35:00Z_
+_Verifier: Claude (manual + local simulation)_

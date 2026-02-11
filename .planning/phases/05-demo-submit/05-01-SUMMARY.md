@@ -29,7 +29,7 @@ Created a safe, best-effort Azure CLI script to stage the demo:
 - **Functionality:**
   - Gets current VM status
   - Starts VM if stopped
-  - Tags VM with `demo=true`, `demo-scenario=gpu-vm-cost-spike`, `demo-date`
+  - Tags VM with `demo=true`, `demo_scenario=gpu-vm-cost-spike`, `demo_date`
   - Displays VM details for confirmation
 
 ### 3. Cleanup Script (`demo/cleanup_demo.sh`)

@@ -1,17 +1,17 @@
 ---
 phase: 05-demo-submit
-verified: 2026-02-11T22:30:00Z
+verified: 2026-02-11T23:00:00Z
 status: passed
-score: 12/12 must-haves verified
+score: 12/12 must-haves verified (re-verified after 05-04 hardening)
 human_verification: none
 ---
 
 # Phase 5: Demo & Submit Verification Report
 
 **Phase Goal:** Polished demo and documentation
-**Verified:** 2026-02-11T22:30:00Z
+**Verified:** 2026-02-11T23:00:00Z
 **Status:** passed
-**Re-verification:** No - initial verification
+**Re-verification:** Yes - re-verified after 05-04 hardening
 
 ## Goal Achievement
 
@@ -25,6 +25,8 @@ human_verification: none
 | 4 | Architecture diagram shows all 6 agents and data flows | ✓ VERIFIED | `docs/architecture.mmd` (80 lines) includes Coordinator + 6 agents + Slack loop |
 | 5 | Demo script timecoded to fit ~2:00 minutes | ✓ VERIFIED | `demo/script.md` (179 lines) has 6 segments with exact timecodes (0:00-2:00) |
 | 6 | Recording checklist exists to produce a 2-minute video | ✓ VERIFIED | `recording_checklist.md` (326 lines) includes pre-flight, per-segment, post-flight |
+| 7 | Demo scripts correctly retrieve VM power state via Azure CLI | ✓ VERIFIED | `demo/stage_anomaly.sh` and `demo/cleanup_demo.sh` use `az vm show -d --query powerState` |
+| 8 | Demo docs are scrubbed of personal identifiers | ✓ VERIFIED | `demo/scenario.md`, `demo/script.md`, and `demo/recording_checklist.md` use placeholders and omit personal IDs |
 
 ### Required Artifacts
 
@@ -83,5 +85,5 @@ No code-level gaps found against Phase 5 must-haves and roadmap success criteria
 
 ---
 
-_Verified: 2026-02-11T22:30:00Z_
+_Verified: 2026-02-11T23:00:00Z_
 _Verifier: Claude (gsd-executor)_
