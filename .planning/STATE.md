@@ -2,16 +2,16 @@
 
 ## Current Position
 
-Phase: 2 of 5 (Investigation Pipeline)
-Plan: 4 of 4
-Status: Phase complete
-Last activity: 2026-02-11 - Phase 2 verification approved (live Azure checks deferred)
-Progress: ████░░░░░░ 8/18 plans complete (44%)
+Phase: 3 of 5 (Diagnosis & Remediation)
+Plan: 2 of 3
+Status: In progress
+Last activity: 2026-02-11 - Completed 03-02 remediation suggestion plan
+Progress: █████░░░░░ 9/18 plans complete (50%)
 
 ## Current Status
 
-**Current Phase:** Investigation Pipeline (Phase 2)
-**Next Action:** Start Phase 3 execution (`/gsd-execute-phase 3`)
+**Current Phase:** Diagnosis & Remediation (Phase 3)
+**Next Action:** Execute remaining Phase 3 plans (`/gsd-execute-phase 3`)
 
 ---
 
@@ -21,7 +21,7 @@ Progress: ████░░░░░░ 8/18 plans complete (44%)
 |-------|------|--------|----------|
 | 1 | Foundation | Complete | 4/4 plans complete, 5/5 requirements validated |
 | 2 | Investigation | Complete | 4/4 plans complete, 6/6 requirements code-verified |
-| 3 | Diagnosis | Not Started | 0/3 plans complete |
+| 3 | Diagnosis | In Progress | 1/3 plans complete |
 | 4 | Human Loop | Not Started | 0/4 plans complete |
 | 5 | Demo | Not Started | 0/3 plans complete |
 
@@ -46,6 +46,9 @@ Progress: ████░░░░░░ 8/18 plans complete (44%)
 | 02-03 | Restrict Cosmos resource auto-creation to dev/local/test | Prevents accidental production-side provisioning while preserving local ergonomics |
 | 02-04 | Run coordinator fan-out with `asyncio.gather` + `asyncio.to_thread` and timeout-to-error conversion | Guarantees parallel investigator start while preserving full aggregation even on slow/failing branches |
 | 02-04 | Keep `UnifiedFindings.results` as canonical payload with legacy top-level fields for transition compatibility | Avoids breaking existing consumers/tests while moving webhook contract to multi-agent aggregation |
+| 03-02 | Enforce `human_approval_required` as `Literal[True]` in remediation actions | Guarantees remediation suggestions stay safe-by-default and require explicit human approval |
+| 03-02 | Use deterministic diagnosis-to-action rules for GPU VM no-shutdown and unexpected runtime cases | Keeps remediation behavior reliable in offline/demo runs without LLM dependency |
+| 03-02 | Always emit a fallback `notify_owner` action when no deterministic infrastructure action matches | Ensures remediation plans are never empty for downstream approval workflows |
 
 ---
 
@@ -59,6 +62,7 @@ None.
 
 | Date | Activity |
 |------|----------|
+| 2026-02-11 | Completed 03-02 remediation plan with structured safe-by-default action models, remediation agent, and behavior tests |
 | 2026-02-11 | Phase 2 verification accepted; live Azure validation deferred by approval |
 | 2026-02-11 | Completed 02-04 parallel coordinator plan with concurrent cost/resource/history orchestration, timeout-safe aggregation, unified webhook response, and deterministic barrier-based parallel test |
 | 2026-02-11 | Completed 02-03 history backend plan with Cosmos incident store, Azure AI Search lookup, graceful History Agent fallback, and smoke coverage |
@@ -75,9 +79,9 @@ None.
 
 ## Session Continuity
 
-- Last session: 2026-02-11T02:42:43Z
-- Stopped at: Phase 2 verification approved
-- Resume file: `.planning/phases/03-diagnosis-remediation/03-01-PLAN.md`
+- Last session: 2026-02-11T04:08:40Z
+- Stopped at: Completed 03-02 remediation suggestion plan
+- Resume file: `.planning/phases/03-diagnosis-remediation/03-03-PLAN.md`
 
 ---
 
