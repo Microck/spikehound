@@ -24,6 +24,9 @@ def test_build_last_7_days_query_definition_shape() -> None:
     assert "totalCost" in definition.dataset.aggregation
     assert definition.dataset.aggregation["totalCost"].name == "PreTaxCost"
     assert definition.dataset.aggregation["totalCost"].function == "Sum"
+    assert definition.dataset.grouping is not None
+    assert len(definition.dataset.grouping) == 1
+    assert definition.dataset.grouping[0].name == "ResourceId"
 
 
 def test_query_last_7_days_uses_subscription_scope_and_query_usage(monkeypatch) -> None:
@@ -72,6 +75,27 @@ def test_rows_to_cost_items_maps_expected_keys() -> None:
         {
             "resource_id": "resource-1",
             "total_cost": 42.5,
+            "currency": "USD",
+            "date": 20260210,
+        }
+    ]
+
+
+def test_rows_to_cost_items_accepts_pretaxcost_column() -> None:
+    result = QueryResult(
+        columns=[
+            QueryColumn(name="PreTaxCost", type="Number"),
+            QueryColumn(name="UsageDate", type="Number"),
+            QueryColumn(name="ResourceId", type="String"),
+            QueryColumn(name="Currency", type="String"),
+        ],
+        rows=[[17.25, 20260210, "resource-2", "USD"]],
+    )
+
+    assert cost_management.rows_to_cost_items(result) == [
+        {
+            "resource_id": "resource-2",
+            "total_cost": 17.25,
             "currency": "USD",
             "date": 20260210,
         }

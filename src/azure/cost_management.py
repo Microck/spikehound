@@ -34,8 +34,6 @@ def build_last_7_days_query_definition(now: datetime | None = None) -> QueryDefi
             },
             grouping=[
                 QueryGrouping(type="Dimension", name="ResourceId"),
-                QueryGrouping(type="Dimension", name="Currency"),
-                QueryGrouping(type="Dimension", name="UsageDate"),
             ],
         ),
     )
@@ -63,8 +61,13 @@ def rows_to_cost_items(result: Any) -> list[dict[str, Any]]:
         if name:
             normalized_index[name.lower()] = idx
 
-    required = ("resourceid", "totalcost", "usagedate")
-    if not all(key in normalized_index for key in required):
+    resource_idx = normalized_index.get("resourceid")
+    date_idx = normalized_index.get("usagedate")
+    cost_idx = normalized_index.get("totalcost")
+    if cost_idx is None:
+        cost_idx = normalized_index.get("pretaxcost")
+
+    if resource_idx is None or date_idx is None or cost_idx is None:
         return []
 
     mapped_rows: list[dict[str, Any]] = []
@@ -74,9 +77,6 @@ def rows_to_cost_items(result: Any) -> list[dict[str, Any]]:
         if not isinstance(row, list):
             continue
 
-        resource_idx = normalized_index["resourceid"]
-        cost_idx = normalized_index["totalcost"]
-        date_idx = normalized_index["usagedate"]
         if max(resource_idx, cost_idx, date_idx) >= len(row):
             continue
 
