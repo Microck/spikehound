@@ -11,6 +11,8 @@ from pydantic import Field
 
 from models.agent_protocol import AgentName
 from models.agent_protocol import AgentResult
+from models.diagnosis import Diagnosis
+from models.remediation import RemediationPlan
 
 
 class CostFinding(BaseModel):
@@ -125,3 +127,9 @@ class UnifiedFindings(BaseModel):
             json.dumps(result.data, sort_keys=True, default=str),
             json.dumps(result.errors, sort_keys=True),
         )
+
+
+class InvestigationReport(BaseModel):
+    unified_findings: UnifiedFindings
+    diagnosis_result: AgentResult[Diagnosis]
+    remediation_result: AgentResult[RemediationPlan]
