@@ -3,10 +3,10 @@
 ## Current Position
 
 Phase: 2 of 5 (Investigation Pipeline)
-Plan: 1 of 4
+Plan: 2 of 4
 Status: In progress
-Last activity: 2026-02-11 - Completed 02-01-PLAN.md
-Progress: ███░░░░░░░ 5/18 plans complete (28%)
+Last activity: 2026-02-11 - Completed 02-02-PLAN.md
+Progress: ███░░░░░░░ 6/18 plans complete (33%)
 
 ## Current Status
 
@@ -20,7 +20,7 @@ Progress: ███░░░░░░░ 5/18 plans complete (28%)
 | Phase | Name | Status | Progress |
 |-------|------|--------|----------|
 | 1 | Foundation | Complete | 4/4 plans complete, 5/5 requirements validated |
-| 2 | Investigation | In Progress | 1/4 plans complete |
+| 2 | Investigation | In Progress | 2/4 plans complete |
 | 3 | Diagnosis | Not Started | 0/3 plans complete |
 | 4 | Human Loop | Not Started | 0/4 plans complete |
 | 5 | Demo | Not Started | 0/3 plans complete |
@@ -40,6 +40,8 @@ Progress: ███░░░░░░░ 5/18 plans complete (28%)
 | 01-04 | Keep Foundry validation read-only by listing at most one agent in smoke checks | Verifies endpoint/auth connectivity without mutating project resources |
 | 02-01 | Keep a shared `AgentResult` envelope (`AgentName`/`AgentStatus`) for all investigator outputs | Lets coordinator aggregate multi-agent results without hardcoded per-agent return shapes |
 | 02-01 | Separate incident persistence (`IncidentStore`) from similarity search (`IncidentSearch`) behind interfaces | Preserves swappable Azure backends while keeping deterministic local fallback behavior |
+| 02-02 | Keep `ResourceFindings.config` optional in degraded outcomes | Ensures resource investigations still return a schema-valid payload when config lookup fails |
+| 02-02 | Resolve target resource IDs via recursive payload key scanning before fallback input | Handles heterogeneous alert payload shapes without hardcoded coordinator coupling |
 
 ---
 
@@ -53,6 +55,7 @@ None.
 
 | Date | Activity |
 |------|----------|
+| 2026-02-11 | Completed 02-02 resource investigation plan with Azure Resource Graph/Activity Logs wrappers, typed resource findings models, and Resource Agent smoke coverage |
 | 2026-02-11 | Completed 02-01 investigation pipeline contracts plan with agent protocol models, deterministic findings merge tests, and incident store/search interfaces |
 | 2026-02-11 | Phase 1 verification accepted; Foundry live endpoint check deferred by approval |
 | 2026-02-11 | Completed 01-04 foundation ergonomics/foundry plan with dev launcher, pytest smoke harness, and read-only Foundry SDK smoke script |
@@ -65,9 +68,9 @@ None.
 
 ## Session Continuity
 
-- Last session: 2026-02-11T02:12:28Z
-- Stopped at: Completed 02-01 investigation pipeline contracts plan
-- Resume file: `.planning/phases/02-investigation-pipeline/02-02-PLAN.md`
+- Last session: 2026-02-11T02:22:46Z
+- Stopped at: Completed 02-02 resource investigation plan
+- Resume file: `.planning/phases/02-investigation-pipeline/02-03-PLAN.md`
 
 ---
 
