@@ -97,6 +97,7 @@ Multi-agent system that auto-debugs Azure cost anomalies before humans join the 
 ## Phase 4: Human Loop
 
 **Goal:** Slack notifications with approval flow
+**Status:** In Progress (2026-02-11, 1/4 plans complete)
 
 **Duration:** ~1 week
 
@@ -114,6 +115,7 @@ Multi-agent system that auto-debugs Azure cost anomalies before humans join the 
 
 **Deliverables:**
 - `src/integrations/slack.py`
+- `src/integrations/message_format.py`
 - `src/execution/remediation.py`
 
 ---
