@@ -3,15 +3,15 @@
 ## Current Position
 
 Phase: 4 of 5 (Human Loop)
-Plan: 2 of 4
+Plan: 3 of 4
 Status: In progress
-Last activity: 2026-02-11 - Completed 04-02 approval interaction plan
-Progress: ███████░░░ 13/18 plans complete (72%)
+Last activity: 2026-02-11 - Completed 04-03 remediation execution plan
+Progress: ████████░░ 14/18 plans complete (78%)
 
 ## Current Status
 
 **Current Phase:** Human Loop (Phase 4)
-**Next Action:** Execute 04-03 remediation execution plan (`/gsd-execute-phase 4`)
+**Next Action:** Execute 04-04 remaining human-loop plan (`/gsd-execute-phase 4`)
 
 ---
 
@@ -22,7 +22,7 @@ Progress: ███████░░░ 13/18 plans complete (72%)
 | 1 | Foundation | Complete | 4/4 plans complete, 5/5 requirements validated |
 | 2 | Investigation | Complete | 4/4 plans complete, 6/6 requirements code-verified |
 | 3 | Diagnosis | Complete | 3/3 plans complete, 4/4 requirements code-verified |
-| 4 | Human Loop | In Progress | 2/4 plans complete |
+| 4 | Human Loop | In Progress | 3/4 plans complete |
 | 5 | Demo | Not Started | 0/3 plans complete |
 
 ---
@@ -60,6 +60,9 @@ Progress: ███████░░░ 13/18 plans complete (72%)
 | 04-02 | Reject Slack action callbacks with invalid or stale signatures | Prevents spoofed or replayed button actions from recording false approvals |
 | 04-02 | Map Slack `action_id` values directly to typed approval decisions | Keeps approve/reject/investigate parsing deterministic and easy to extend |
 | 04-02 | Persist approval decisions in in-memory records keyed by investigation ID | Enables immediate human-loop state tracking without introducing premature storage architecture |
+| 04-03 | Gate remediation execution on explicit `approve` decisions only | Enforces HUMAN-04 safety invariant so non-approved actions never execute |
+| 04-03 | Execute approved remediations in FastAPI background tasks | Keeps Slack action HTTP responses quick while remediation calls run asynchronously |
+| 04-03 | Keep auto-shutdown execution as degraded placeholder and ship `stop_vm` execution first | Delivers minimum viable executable remediation while isolating uncertain API wiring |
 
 ---
 
@@ -73,6 +76,7 @@ None.
 
 | Date | Activity |
 |------|----------|
+| 2026-02-11 | Completed 04-03 remediation execution plan with Azure Compute stop helper, approval-gated executor outcomes, and Slack approval-triggered follow-up execution reporting |
 | 2026-02-11 | Completed 04-02 human-loop plan with approval decision models, Slack signature verification tests, interactive action buttons, and signed callback recording endpoint |
 | 2026-02-11 | Completed 04-01 human-loop plan with Slack webhook client, report formatter, and webhook-triggered Slack send integration plus formatter test coverage |
 | 2026-02-11 | Completed 03-03 coordinator integration plan with full webhook report schema, deterministic local e2e pipeline test, and manual smoke validation of cost/resource/history/diagnosis/remediation output sections |
@@ -94,9 +98,9 @@ None.
 
 ## Session Continuity
 
-- Last session: 2026-02-11T17:56:30Z
-- Stopped at: Completed 04-02 approval interaction plan
-- Resume file: `.planning/phases/04-human-loop/04-03-PLAN.md`
+- Last session: 2026-02-11T18:06:08Z
+- Stopped at: Completed 04-03 remediation execution plan
+- Resume file: `.planning/phases/04-human-loop/04-04-PLAN.md`
 
 ---
 

@@ -4,7 +4,7 @@
 **Phase:** 04-human-loop
 **Status:** Incomplete
 
-Complete these items for Slack notification delivery and interactive approval buttons. Claude implemented the webhook sender, button formatting, and action endpoint; these steps require Slack workspace access.
+Complete these items for Slack notification delivery, interactive approval buttons, and Azure remediation execution. Claude implemented the sender/execution wiring; these steps require Slack and Azure access.
 
 ## Environment Variables
 
@@ -13,12 +13,17 @@ Complete these items for Slack notification delivery and interactive approval bu
 | [ ] | `SLACK_WEBHOOK_URL` | Slack App -> Incoming Webhooks -> Copy Webhook URL | `.env` |
 | [ ] | `SLACK_SIGNING_SECRET` | Slack App -> Basic Information -> App Credentials -> Signing Secret | `.env` |
 | [ ] | `SLACK_BOT_TOKEN` | Slack App -> OAuth & Permissions -> Bot User OAuth Token | `.env` |
+| [ ] | `AZURE_SUBSCRIPTION_ID` | Azure Portal -> Subscriptions -> Copy subscription ID | `.env` |
 
 ## Account Setup
 
 - [ ] **Create or open a Slack app for TriageForge**
   - URL: https://api.slack.com/apps
   - Skip if: You already have an app used for this incident channel
+
+- [ ] **Confirm Azure principal used by the app**
+  - Location: Azure Portal -> Microsoft Entra ID -> Enterprise applications (or App registrations)
+  - Notes: Use the same principal configured for your local credential flow/service principal
 
 ## Dashboard Configuration
 
@@ -36,19 +41,26 @@ Complete these items for Slack notification delivery and interactive approval bu
   - Location: Slack App -> OAuth & Permissions
   - Notes: Confirm bot token value used for `SLACK_BOT_TOKEN`
 
+- [ ] **Grant remediation principal access to target resource group (demo scope)**
+  - Location: Azure Portal -> Resource Group -> Access control (IAM)
+  - Role: Contributor
+  - Notes: Required for stop VM and auto-shutdown remediation calls
+
 ## Verification
 
 After completing setup, verify with:
 
 ```bash
-grep -E "SLACK_WEBHOOK_URL|SLACK_SIGNING_SECRET|SLACK_BOT_TOKEN" .env
+grep -E "SLACK_WEBHOOK_URL|SLACK_SIGNING_SECRET|SLACK_BOT_TOKEN|AZURE_SUBSCRIPTION_ID" .env
 . .venv/bin/activate && PYTHONPATH=src python3 -c "from integrations.slack import send_webhook; send_webhook('TriageForge Slack setup verification')"
+. .venv/bin/activate && PYTHONPATH=src python3 -c "from execution.remediation import execute_remediation; print('remediation module import ok')"
 ```
 
 Expected results:
-- All three `SLACK_*` values are present in `.env`
+- All `SLACK_*` values and `AZURE_SUBSCRIPTION_ID` are present in `.env`
 - Slack channel receives the verification message
 - Slack button clicks are delivered to `/webhooks/slack/actions` once app interactivity is enabled
+- Remediation executor import succeeds locally (Azure credentials still required at runtime)
 
 ---
 
