@@ -93,6 +93,38 @@ def format_investigation_report_for_slack(report: Any) -> dict[str, Any]:
     return {"text": text, "blocks": blocks}
 
 
+def format_investigation_report_for_discord(report: Any) -> dict[str, Any]:
+    payload = _to_mapping(report)
+    unified_findings = _to_mapping(payload.get("unified_findings"))
+    diagnosis_data = _to_mapping(
+        _to_mapping(payload.get("diagnosis_result")).get("data")
+    )
+    diagnosis_hypothesis = _to_mapping(diagnosis_data.get("hypothesis"))
+    remediation_data = _to_mapping(
+        _to_mapping(payload.get("remediation_result")).get("data")
+    )
+
+    top_cost_drivers = _top_cost_drivers(unified_findings.get("cost_findings"))
+    cost_driver_text = ", ".join(top_cost_drivers) if top_cost_drivers else "none"
+    confidence = diagnosis_data.get("confidence")
+    confidence_text = f"{confidence}%" if isinstance(confidence, int) else "unknown"
+    root_cause_title = str(diagnosis_hypothesis.get("title") or "Unknown root cause")
+    first_action = _first_remediation_action(remediation_data.get("actions"))
+    alert_id = str(unified_findings.get("alert_id") or "unknown-alert")
+
+    content = "\n".join(
+        [
+            f"Incident Investigation Complete: {alert_id}",
+            f"Top cost driver(s): {cost_driver_text}",
+            f"Confidence: {confidence_text}",
+            f"Root cause: {root_cause_title}",
+            f"First remediation action: {first_action}",
+        ]
+    )
+
+    return {"content": content}
+
+
 def _to_mapping(value: Any) -> dict[str, Any]:
     if isinstance(value, BaseModel):
         return value.model_dump(mode="json")
