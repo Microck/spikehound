@@ -81,6 +81,13 @@ LOG_LEVEL=INFO
 AZURE_SUBSCRIPTION_ID=<your-subscription-id>
 AZURE_AI_PROJECT_ENDPOINT=<your-foundry-endpoint>
 
+# Azure OpenAI / Foundry (optional: enables LLM-backed diagnosis)
+# FOUNDRY_MODEL is the Azure OpenAI *deployment name*.
+FOUNDRY_ENDPOINT=<your-azure-openai-endpoint>
+FOUNDRY_MODEL=<your-deployment-name>
+FOUNDRY_API_KEY=<your-azure-openai-key>
+FOUNDRY_API_VERSION=2024-08-01-preview
+
 # Slack
 SLACK_WEBHOOK_URL=<your-incoming-webhook-url>
 SLACK_SIGNING_SECRET=<your-signing-secret>
@@ -89,6 +96,9 @@ SLACK_SIGNING_SECRET=<your-signing-secret>
 **Where to get values:**
 - `AZURE_SUBSCRIPTION_ID`: Azure Portal → Subscriptions → Subscription ID
 - `AZURE_AI_PROJECT_ENDPOINT`: Azure AI Foundry → Project endpoint
+- `FOUNDRY_ENDPOINT`: Azure Portal → Azure OpenAI resource → Keys & Endpoint → Endpoint
+- `FOUNDRY_MODEL`: Azure OpenAI resource → Deployments → *Deployment name*
+- `FOUNDRY_API_KEY`: Azure OpenAI resource → Keys & Endpoint → Key
 - `SLACK_WEBHOOK_URL`: Slack App → Incoming Webhooks → Webhook URL
 - `SLACK_SIGNING_SECRET`: Slack App → Basic Information → Signing Secret
 
