@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import json
 import os
 from typing import Any
@@ -22,7 +23,9 @@ class FoundryResponseError(FoundryError):
 
 
 class FoundryClient:
-    API_VERSION = "2024-06-01"
+    # Azure OpenAI chat completions API version.
+    # Note: `response_format.type=json_schema` requires 2024-08-01-preview or later.
+    DEFAULT_API_VERSION = "2024-08-01-preview"
 
     def __init__(
         self,
@@ -30,6 +33,7 @@ class FoundryClient:
         endpoint: str | None = None,
         model: str | None = None,
         api_key: str | None = None,
+        api_version: str | None = None,
         timeout: float = 30.0,
         http_client: httpx.Client | None = None,
     ) -> None:
@@ -38,6 +42,15 @@ class FoundryClient:
         )
         self._model = (model or os.getenv("FOUNDRY_MODEL") or "").strip()
         self._api_key = (api_key or os.getenv("FOUNDRY_API_KEY") or "").strip()
+        self._api_version = (
+            (
+                api_version
+                or os.getenv("FOUNDRY_API_VERSION")
+                or self.DEFAULT_API_VERSION
+            )
+            .strip()
+            .rstrip("/")
+        )
         self._timeout = timeout
         self._http_client = http_client
 
@@ -49,7 +62,7 @@ class FoundryClient:
     ) -> dict[str, Any]:
         self._ensure_configured()
 
-        payload = {
+        payload: dict[str, Any] = {
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
@@ -62,14 +75,35 @@ class FoundryClient:
             "Content-Type": "application/json",
         }
 
+        response_formats = self._response_format_attempts(model_cls)
+
         try:
-            response = self._post(payload, headers)
-            response.raise_for_status()
-            body = response.json()
-            content = self._extract_content(body)
-            parsed = json.loads(content)
-            validated = model_cls.model_validate(parsed)
-            return validated.model_dump(mode="json")
+            last_error: Exception | None = None
+            for response_format in response_formats:
+                attempt_payload = dict(payload)
+                if response_format is not None:
+                    attempt_payload["response_format"] = response_format
+
+                try:
+                    response = self._post(attempt_payload, headers)
+                    response.raise_for_status()
+                    body = response.json()
+                    content = self._extract_content(body)
+                    parsed = json.loads(content)
+                    validated = model_cls.model_validate(parsed)
+                    return validated.model_dump(mode="json")
+                except httpx.HTTPStatusError as exc:
+                    last_error = exc
+                    status_code = exc.response.status_code
+                    # If `json_schema` is unsupported or schema validation fails server-side,
+                    # retry with a weaker but broadly supported response format.
+                    if status_code == 400:
+                        continue
+                    raise
+
+            if last_error is not None:
+                raise last_error
+            raise FoundryResponseError("Foundry response format attempts exhausted")
         except FoundryResponseError:
             raise
         except (
@@ -80,10 +114,16 @@ class FoundryClient:
         ) as exc:
             raise FoundryResponseError(f"Invalid Foundry response: {exc}") from exc
 
-    def _post(self, payload: dict[str, Any], headers: dict[str, str]) -> httpx.Response:
+    def _post(
+        self,
+        payload: dict[str, Any],
+        headers: dict[str, str],
+        *,
+        api_version: str | None = None,
+    ) -> httpx.Response:
         url = (
             f"{self._endpoint}/openai/deployments/{self._model}/chat/completions"
-            f"?api-version={self.API_VERSION}"
+            f"?api-version={api_version or self._api_version}"
         )
 
         if self._http_client is not None:
@@ -106,6 +146,111 @@ class FoundryClient:
             raise FoundryNotConfiguredError(
                 f"Foundry client is not configured. Missing: {joined}"
             )
+
+    def _response_format_attempts(
+        self, model_cls: type[BaseModel]
+    ) -> list[dict[str, Any] | None]:
+        """Return response_format strategies in preferred order.
+
+        We prefer JSON schema structured outputs when the model schema can be made strict.
+        If not, we fallback to JSON mode (valid JSON, not schema-constrained).
+        As a last resort, we rely on prompting only.
+        """
+
+        attempts: list[dict[str, Any] | None] = []
+
+        json_schema_format = self._build_json_schema_response_format(model_cls)
+        if json_schema_format is not None:
+            attempts.append(json_schema_format)
+
+        # JSON mode is widely supported across Azure OpenAI chat models.
+        attempts.append({"type": "json_object"})
+
+        # Prompt-only fallback.
+        attempts.append(None)
+        return attempts
+
+    def _build_json_schema_response_format(
+        self, model_cls: type[BaseModel]
+    ) -> dict[str, Any] | None:
+        schema = self._build_strict_json_schema(model_cls)
+        if schema is None:
+            return None
+
+        return {
+            "type": "json_schema",
+            "json_schema": {
+                "name": model_cls.__name__,
+                "schema": schema,
+                "strict": True,
+            },
+        }
+
+    def _build_strict_json_schema(
+        self, model_cls: type[BaseModel]
+    ) -> dict[str, Any] | None:
+        """Build a strict JSON schema suitable for Azure Structured Outputs.
+
+        Azure Structured Outputs has stricter requirements than Pydantic defaults:
+        - `additionalProperties` must be false on objects
+        - `required` must include every key in `properties`
+
+        Some models (e.g., those containing free-form dict fields) cannot be made strict
+        without losing semantics. In those cases, return None and rely on JSON mode.
+        """
+
+        raw_schema = model_cls.model_json_schema()
+        if not self._schema_is_strictable(raw_schema):
+            return None
+
+        patched = copy.deepcopy(raw_schema)
+
+        def patch(node: Any) -> None:
+            if isinstance(node, dict):
+                if node.get("type") == "object" and isinstance(
+                    node.get("properties"), dict
+                ):
+                    props = node["properties"]
+                    node["additionalProperties"] = False
+                    node["required"] = list(props.keys())
+
+                for value in node.values():
+                    patch(value)
+            elif isinstance(node, list):
+                for item in node:
+                    patch(item)
+
+        patch(patched)
+        return patched
+
+    @staticmethod
+    def _schema_is_strictable(schema: dict[str, Any]) -> bool:
+        """Return True if schema can be used with strict Structured Outputs.
+
+        We reject schemas that contain free-form objects/dicts (additionalProperties true
+        or schema-valued additionalProperties), since forcing additionalProperties=false
+        would silently drop legitimate keys.
+        """
+
+        stack: list[Any] = [schema]
+        while stack:
+            node = stack.pop()
+            if isinstance(node, dict):
+                additional = node.get("additionalProperties")
+                if additional is True or isinstance(additional, dict):
+                    return False
+
+                node_type = node.get("type")
+                if node_type == "object" and "properties" not in node:
+                    # Likely a dict-like schema; not safe to make strict.
+                    if additional is not False:
+                        return False
+
+                stack.extend(node.values())
+            elif isinstance(node, list):
+                stack.extend(node)
+
+        return True
 
     @staticmethod
     def _extract_content(body: dict[str, Any]) -> str:
