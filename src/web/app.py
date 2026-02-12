@@ -16,6 +16,8 @@ from fastapi import Request
 
 from agents.coordinator import CoordinatorAgent
 from execution.remediation import execute_remediation
+from integrations.discord import send_discord_webhook
+from integrations.message_format import format_investigation_report_for_discord
 from integrations.message_format import format_investigation_report_for_slack
 from integrations.slack import format_execution_outcomes_for_slack
 from integrations.slack import send_webhook
@@ -103,6 +105,12 @@ async def webhook_alert(payload: dict[str, Any] = Body(...)) -> InvestigationRep
         )
     except Exception as exc:  # pragma: no cover - defensive protection
         logger.warning("slack_notification_failed", extra={"error": str(exc)})
+
+    try:
+        discord_message = format_investigation_report_for_discord(report)
+        send_discord_webhook(discord_message)
+    except Exception as exc:  # pragma: no cover - defensive protection
+        logger.warning("discord_notification_failed", extra={"error": str(exc)})
 
     return report
 
