@@ -4,11 +4,68 @@ import logging
 import os
 import time
 from typing import Any
+from typing import Mapping
 
 import httpx
+from nacl.exceptions import BadSignatureError
+from nacl.signing import VerifyKey
 
 
 logger = logging.getLogger("incident-war-room.integrations.discord")
+DISCORD_SIGNATURE_MAX_AGE_SECONDS = 60 * 5
+
+
+def verify_discord_signature(raw_body: str | bytes, headers: Mapping[str, str]) -> bool:
+    public_key_hex = os.getenv("DISCORD_INTERACTIONS_PUBLIC_KEY")
+    if not public_key_hex:
+        logger.warning(
+            "discord_signature_verification_failed",
+            extra={"reason": "missing DISCORD_INTERACTIONS_PUBLIC_KEY"},
+        )
+        return False
+
+    timestamp = _get_header(headers, "X-Signature-Timestamp")
+    signature_hex = _get_header(headers, "X-Signature-Ed25519")
+    if not timestamp or not signature_hex:
+        return False
+
+    try:
+        timestamp_int = int(timestamp)
+    except ValueError:
+        return False
+
+    if abs(int(time.time()) - timestamp_int) > DISCORD_SIGNATURE_MAX_AGE_SECONDS:
+        return False
+
+    if isinstance(raw_body, str):
+        body_bytes = raw_body.encode("utf-8")
+    else:
+        body_bytes = raw_body
+
+    try:
+        public_key = VerifyKey(bytes.fromhex(public_key_hex))
+        signature = bytes.fromhex(signature_hex)
+    except ValueError:
+        return False
+
+    signed_payload = timestamp.encode("utf-8") + body_bytes
+    try:
+        public_key.verify(signed_payload, signature)
+    except BadSignatureError:
+        return False
+
+    return True
+
+
+def build_discord_custom_id(action: str, investigation_id: str) -> str:
+    return f"{action}:{investigation_id}"
+
+
+def parse_discord_custom_id(custom_id: str) -> tuple[str, str] | None:
+    action, separator, investigation_id = custom_id.partition(":")
+    if separator != ":" or not action or not investigation_id:
+        return None
+    return action, investigation_id
 
 
 def send_discord_webhook(payload: dict[str, Any]) -> None:
@@ -141,3 +198,16 @@ def _float_env(name: str, *, default: float) -> float:
     except ValueError:
         return default
     return max(parsed, 0.1)
+
+
+def _get_header(headers: Mapping[str, str], name: str) -> str:
+    value = headers.get(name)
+    if isinstance(value, str) and value:
+        return value
+
+    lowered_name = name.lower()
+    for key, header_value in headers.items():
+        if key.lower() == lowered_name and header_value:
+            return header_value
+
+    return ""

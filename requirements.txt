@@ -12,3 +12,4 @@ uvicorn[standard]
 pydantic
 python-dotenv
 httpx
+pynacl

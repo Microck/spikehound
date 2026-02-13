@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 from typing import Mapping
 
+from integrations.discord import build_discord_custom_id
 from pydantic import BaseModel
 
 
@@ -162,9 +163,45 @@ def format_investigation_report_for_discord(report: Any) -> dict[str, Any]:
     if timestamp is not None:
         embed["timestamp"] = timestamp
 
+    components = [
+        {
+            "type": 1,
+            "components": [
+                {
+                    "type": 2,
+                    "style": 3,
+                    "label": "Approve",
+                    "custom_id": build_discord_custom_id(
+                        "approve_remediation",
+                        alert_id,
+                    ),
+                },
+                {
+                    "type": 2,
+                    "style": 4,
+                    "label": "Reject",
+                    "custom_id": build_discord_custom_id(
+                        "reject_remediation",
+                        alert_id,
+                    ),
+                },
+                {
+                    "type": 2,
+                    "style": 2,
+                    "label": "Investigate More",
+                    "custom_id": build_discord_custom_id(
+                        "investigate_more",
+                        alert_id,
+                    ),
+                },
+            ],
+        }
+    ]
+
     return {
         "content": content,
         "embeds": [embed],
+        "components": components,
         "allowed_mentions": {"parse": []},
     }
 
