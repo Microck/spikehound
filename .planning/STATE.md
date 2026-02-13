@@ -5,7 +5,7 @@
 Phase: 5 of 5 (Demo & Submit)
 Plan: 4 of 4
 Status: Phase complete
-Last activity: 2026-02-12 - Completed quick task 002: Upgrade Discord notifications to high-tier UX and reliability
+Last activity: 2026-02-13 - Completed quick task 003: Add Discord interactive approval flow parity with Slack
 Progress: ██████████ 19/19 plans complete (100%)
 
 ## Current Status
@@ -66,6 +66,8 @@ Progress: ██████████ 19/19 plans complete (100%)
 | 04-04 | Normalize alert payloads at webhook ingress before coordinator fan-out | Keeps downstream agents schema-stable for both legacy payloads and Azure Monitor common schema |
 | 04-04 | Use `alert_id` as the in-memory idempotency key with configurable TTL | Prevents duplicate pipeline execution for repeated alert deliveries during demo flows |
 | 04-04 | Retry webhook coordinator execution once for transient timeout/network errors | Improves reliability without hiding persistent failures behind unbounded retries |
+| quick-003-01 | Reuse `ACTION_DECISION_MAP` for Discord callback action IDs | Preserves Slack/Discord approval decision parity with one shared mapping source |
+| quick-003-01 | Return Discord interaction acknowledgements as ephemeral `type=4` responses | Confirms callback handling immediately while avoiding channel noise |
 
 ---
 
@@ -79,6 +81,7 @@ None.
 |---|-------------|------|--------|-----------|
 | 001 | Add Discord notifications alongside Slack | 2026-02-12 | 015dc8d | [001-add-discord-notifications-alongside-slac](./quick/001-add-discord-notifications-alongside-slac/) |
 | 002 | Upgrade Discord notifications to high-tier UX and reliability | 2026-02-12 | 67e1b3c | [002-upgrade-discord-notifications-to-high-ti](./quick/002-upgrade-discord-notifications-to-high-ti/) |
+| 003 | Add Discord interactive approval flow parity | 2026-02-13 | 8f6102d | [003-add-discord-interactive-approval-flow-pa](./quick/003-add-discord-interactive-approval-flow-pa/) |
 
 ---
 
@@ -86,6 +89,7 @@ None.
 
 | Date | Activity |
 |------|----------|
+| 2026-02-13 | Completed quick task 003: added signed Discord interactions endpoint, approval decision mapping parity, and Discord interaction tests |
 | 2026-02-12 | Completed quick task 002: upgraded Discord payload UX (rich embeds), mention safety defaults, and rate-limit-aware retries |
 | 2026-02-11 | Completed 05-04 hardening pass: robust demo scripts, resilient diagram rendering, and doc identifier scrub |
 | 2026-02-11 | Completed Phase 5 (Demo & Submit): 05-01 staged demo scenario with documentation and safe Azure CLI scripts |
@@ -113,10 +117,10 @@ None.
 
 ## Session Continuity
 
-- Last session: 2026-02-11T19:35:10Z
-- Stopped at: Completed 04-04 webhook hardening plan
-- Resume file: `.planning/phases/05-demo-submit/05-01-PLAN.md`
+- Last session: 2026-02-13T01:35:25Z
+- Stopped at: Completed quick task 003 Discord interactive approval flow parity
+- Resume file: `.planning/quick/003-add-discord-interactive-approval-flow-pa/003-PLAN.md`
 
 ---
 
-*Last updated: 2026-02-11*
+*Last updated: 2026-02-13*
