@@ -103,8 +103,20 @@ def test_discord_formatting_returns_non_empty_content_with_key_details() -> None
     assert content.strip()
     assert "vm-test-1" in content
     assert "85%" in content
-    assert "GPU VM left running" in content
-    assert "add_auto_shutdown" in content
+
+    embeds = formatted["embeds"]
+    assert isinstance(embeds, list)
+    assert len(embeds) == 1
+
+    embed = embeds[0]
+    assert embed["title"] == "Incident Investigation Complete"
+
+    field_values = [field["value"] for field in embed["fields"]]
+    assert any("GPU VM left running" in value for value in field_values)
+    assert any("add_auto_shutdown" in value for value in field_values)
+
+    allowed_mentions = formatted["allowed_mentions"]
+    assert allowed_mentions == {"parse": []}
 
 
 def test_discord_formatting_payload_is_json_serializable() -> None:
