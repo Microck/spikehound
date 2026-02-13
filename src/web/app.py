@@ -16,7 +16,9 @@ from fastapi import Request
 
 from agents.coordinator import CoordinatorAgent
 from execution.remediation import execute_remediation
+from integrations.discord import parse_discord_custom_id
 from integrations.discord import send_discord_webhook
+from integrations.discord import verify_discord_signature
 from integrations.message_format import format_investigation_report_for_discord
 from integrations.message_format import format_investigation_report_for_slack
 from integrations.slack import format_execution_outcomes_for_slack
@@ -360,6 +362,81 @@ async def webhook_slack_actions(
     return {"text": response_text}
 
 
+@app.post("/webhooks/discord/interactions")
+async def webhook_discord_interactions(
+    request: Request,
+    background_tasks: BackgroundTasks,
+) -> dict[str, Any]:
+    raw_body = await request.body()
+    if not verify_discord_signature(raw_body, request.headers):
+        raise HTTPException(status_code=401, detail="invalid discord signature")
+
+    try:
+        payload = json.loads(raw_body.decode("utf-8"))
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=400, detail="invalid discord payload") from exc
+
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=400, detail="invalid discord payload")
+
+    interaction_type = payload.get("type")
+    if interaction_type == 1:
+        return {"type": 1}
+    if interaction_type != 3:
+        raise HTTPException(
+            status_code=400,
+            detail="unsupported discord interaction type",
+        )
+
+    custom_id = str(_as_mapping(payload.get("data")).get("custom_id") or "")
+    parsed_custom_id = parse_discord_custom_id(custom_id)
+    if parsed_custom_id is None:
+        raise HTTPException(status_code=400, detail="invalid discord action")
+
+    action_id, investigation_id = parsed_custom_id
+    decision = ACTION_DECISION_MAP.get(action_id)
+    if decision is None:
+        raise HTTPException(status_code=400, detail="unsupported discord action")
+
+    record = ApprovalRecord(
+        investigation_id=investigation_id,
+        decision=decision,
+        decided_by=_extract_user_identifier(_extract_discord_user_payload(payload)),
+        decided_at=datetime.now(timezone.utc),
+        reason=(
+            "Requested additional investigation"
+            if decision is ApprovalDecision.INVESTIGATE
+            else None
+        ),
+    )
+    approval_records[investigation_id] = record
+    logger.info(
+        "discord_approval_recorded",
+        extra={
+            "investigation_id": investigation_id,
+            "decision": decision.value,
+            "decided_by": record.decided_by,
+        },
+    )
+
+    response_text = f"Recorded **{decision.value}** decision for investigation `{investigation_id}`."
+    if decision is ApprovalDecision.APPROVE:
+        background_tasks.add_task(
+            _execute_approved_remediation,
+            investigation_id,
+            record,
+        )
+        response_text = f"{response_text} Remediation execution has been queued."
+
+    return {
+        "type": 4,
+        "data": {
+            "content": response_text,
+            "flags": 64,
+        },
+    }
+
+
 def _execute_approved_remediation(
     investigation_id: str,
     approval_record: ApprovalRecord,
@@ -394,3 +471,16 @@ def _extract_user_identifier(user_payload: Any) -> str:
             if isinstance(value, str) and value:
                 return value
     return "unknown-user"
+
+
+def _extract_discord_user_payload(payload: Mapping[str, Any]) -> Any:
+    member_payload = _as_mapping(payload.get("member"))
+    member_user_payload = member_payload.get("user")
+    if isinstance(member_user_payload, dict):
+        return member_user_payload
+
+    user_payload = payload.get("user")
+    if isinstance(user_payload, dict):
+        return user_payload
+
+    return None
