@@ -1,4 +1,4 @@
-# TriageForge Demo Script (2 Minutes)
+# Spikehound Demo Script (2 Minutes)
 
 ## Timecoded Demo
 
@@ -7,7 +7,7 @@ This script provides a precise, timecoded demo for the hackathon presentation. T
 ### Prerequisites
 
 1. **Azure CLI is authenticated:** `az account show` confirms access
-2. **TriageForge server is running:** `uvicorn web.app:app --app-dir src --port 8000`
+2. **Spikehound server is running:** `uvicorn web.app:app --app-dir src --port 8000`
 3. **Slack app is configured:** `.env` has `SLACK_WEBHOOK_URL` and `SLACK_SIGNING_SECRET`
 4. **Demo VM is staged:** Run `bash demo/stage_anomaly.sh --vm-name <vm> --resource-group <rg>` first
 
@@ -25,11 +25,11 @@ This script provides a precise, timecoded demo for the hackathon presentation. T
 ### 0:00 - 0:10 | Introduction (10 seconds)
 
 **Show:** README.md in editor or browser
-- Highlight project name: "TriageForge — Multi-Agent Azure Cost Anomaly War Room"
+- Highlight project name: "Spikehound — Multi-Agent Azure Cost Anomaly War Room"
 - Show that we won **3 prize categories**: Agentic DevOps, Multi-Agent, Azure Integration
 
 **Say:**
-> "Today I'll demonstrate TriageForge, a multi-agent system that automatically investigates Azure cost anomalies. We built this for the Microsoft AI Dev Days Hackathon 2026 and it targets three prize categories."
+> "Today I'll demonstrate Spikehound, a multi-agent system that automatically investigates Azure cost anomalies. We built this for the Microsoft AI Dev Days Hackathon 2026 and it targets three prize categories."
 
 ### 0:10 - 0:30 | Architecture Overview (20 seconds)
 

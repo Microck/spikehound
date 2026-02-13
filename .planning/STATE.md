@@ -1,4 +1,4 @@
-# TriageForge - Project State
+# Spikehound - Project State
 
 ## Current Position
 
@@ -95,7 +95,7 @@ None.
 | 2026-02-11 | Completed Phase 5 (Demo & Submit): 05-01 staged demo scenario with documentation and safe Azure CLI scripts |
 | 2026-02-11 | Completed Phase 5 (Demo & Submit): 05-02 README and architecture diagram (Mermaid + PNG rendered) with render script |
 | 2026-02-11 | Completed Phase 5 (Demo & Submit): 05-03 timecoded 2-minute demo script with comprehensive recording checklist |
-| 2026-02-11 | All phases complete (19/19 plans, 100%) — TriageForge ready for hackathon submission |
+| 2026-02-11 | All phases complete (19/19 plans, 100%) — Spikehound ready for hackathon submission |
 | 2026-02-11 | Completed 04-02 human-loop plan with approval decision models, Slack signature verification tests, interactive action buttons, and signed callback recording endpoint |
 | 2026-02-11 | Completed 04-01 human-loop plan with Slack webhook client, report formatter, and webhook-triggered Slack send integration plus formatter test coverage |
 | 2026-02-11 | Completed 03-03 coordinator integration plan with full webhook report schema, deterministic local e2e pipeline test, and manual smoke validation of cost/resource/history/diagnosis/remediation output sections |

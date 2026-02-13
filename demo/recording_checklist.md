@@ -12,7 +12,7 @@ Use this checklist to produce a consistent, high-quality 2-minute demo video for
   - Verify: `az account show` shows correct subscription
   - Optional: `az account show --query '{user:user.name, subscription:id}' -o json`
 
-- [ ] **TriageForge server is running**
+- [ ] **Spikehound server is running**
   - Verify: `curl http://localhost:8000/health` returns `{"ok":true}`
   - Terminal 1 shows: `INFO:     Application startup complete`
 
@@ -55,7 +55,7 @@ Use this checklist to produce a consistent, high-quality 2-minute demo video for
 
 **What to show:**
 - README.md opened, highlight project name
-- Say: "Today I'll demonstrate TriageForge..." intro speech
+- Say: "Today I'll demonstrate Spikehound..." intro speech
 
 **Checklist:**
 - [ ] Project name is clearly stated
@@ -64,7 +64,7 @@ Use this checklist to produce a consistent, high-quality 2-minute demo video for
 - [ ] Audio is clear (test: "Today I'll demonstrate..." is audible)
 
 **Expected one-liners:**
-- "TriageForge — Multi-Agent Azure Cost Anomaly War Room"
+- "Spikehound — Multi-Agent Azure Cost Anomaly War Room"
 - "Targets: Agentic DevOps, Multi-Agent, Azure Integration"
 
 ---

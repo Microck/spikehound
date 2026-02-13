@@ -1,10 +1,10 @@
-# TriageForge
+# Spikehound
 
 > Multi-agent system that auto-investigates Azure cost anomalies before humans join the call
 
 ## Vision
 
-Every month, Azure bills surprise teams. A single misconfigured VM can cost thousands. **TriageForge** is a multi-agent system that automatically detects cost anomalies, investigates root causes, and suggests remediation - all before a human even opens the alert.
+Every month, Azure bills surprise teams. A single misconfigured VM can cost thousands. **Spikehound** is a multi-agent system that automatically detects cost anomalies, investigates root causes, and suggests remediation - all before a human even opens the alert.
 
 ## One-Liner
 
@@ -26,7 +26,7 @@ Azure cost anomalies are hard to debug:
 
 ## The Solution
 
-TriageForge - A multi-agent investigation system:
+Spikehound - A multi-agent investigation system:
 1. **Detects** cost anomalies via Azure Monitor alerts
 2. **Dispatches** specialized agents in parallel
 3. **Investigates** resources, activity logs, history
@@ -106,7 +106,7 @@ TriageForge - A multi-agent investigation system:
 4. **[1:00-1:20]** Diagnosis: "GPU VM missing auto-shutdown, 94% confidence"
 5. **[1:20-1:40]** Slack notification with [Approve] button
 6. **[1:40-1:55]** Human approves, fix applied, cost normalized
-7. **[1:55-2:00]** "TriageForge: Multi-agent cost investigation"
+7. **[1:55-2:00]** "Spikehound: Multi-agent cost investigation"
 
 ## Constraints
 

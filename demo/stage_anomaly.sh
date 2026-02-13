@@ -53,7 +53,7 @@ if [[ -z "$VM_NAME" || -z "$RESOURCE_GROUP" ]]; then
 fi
 
 echo "=========================================="
-echo "TriageForge Demo: Staging Anomaly"
+echo "Spikehound Demo: Staging Anomaly"
 echo "=========================================="
 echo "VM Name: $VM_NAME"
 echo "Resource Group: $RESOURCE_GROUP"

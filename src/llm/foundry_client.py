@@ -40,7 +40,12 @@ class FoundryClient:
         self._endpoint = (
             (endpoint or os.getenv("FOUNDRY_ENDPOINT") or "").strip().rstrip("/")
         )
-        self._model = (model or os.getenv("FOUNDRY_MODEL") or "").strip()
+        model_raw = (model or os.getenv("FOUNDRY_MODEL") or "").strip()
+        # Allow comma-separated deployment candidates so renames can be rolled out
+        # without breaking existing environments.
+        self._models = [
+            candidate.strip() for candidate in model_raw.split(",") if candidate.strip()
+        ]
         self._api_key = (api_key or os.getenv("FOUNDRY_API_KEY") or "").strip()
         self._api_version = (
             (
@@ -79,27 +84,32 @@ class FoundryClient:
 
         try:
             last_error: Exception | None = None
-            for response_format in response_formats:
-                attempt_payload = dict(payload)
-                if response_format is not None:
-                    attempt_payload["response_format"] = response_format
+            for model in self._models:
+                for response_format in response_formats:
+                    attempt_payload = dict(payload)
+                    if response_format is not None:
+                        attempt_payload["response_format"] = response_format
 
-                try:
-                    response = self._post(attempt_payload, headers)
-                    response.raise_for_status()
-                    body = response.json()
-                    content = self._extract_content(body)
-                    parsed = json.loads(content)
-                    validated = model_cls.model_validate(parsed)
-                    return validated.model_dump(mode="json")
-                except httpx.HTTPStatusError as exc:
-                    last_error = exc
-                    status_code = exc.response.status_code
-                    # If `json_schema` is unsupported or schema validation fails server-side,
-                    # retry with a weaker but broadly supported response format.
-                    if status_code == 400:
-                        continue
-                    raise
+                    try:
+                        response = self._post(attempt_payload, headers, model=model)
+                        response.raise_for_status()
+                        body = response.json()
+                        content = self._extract_content(body)
+                        parsed = json.loads(content)
+                        validated = model_cls.model_validate(parsed)
+                        return validated.model_dump(mode="json")
+                    except httpx.HTTPStatusError as exc:
+                        last_error = exc
+                        status_code = exc.response.status_code
+                        # If `json_schema` is unsupported or schema validation fails server-side,
+                        # retry with a weaker but broadly supported response format.
+                        if status_code == 400:
+                            continue
+                        # If a deployment name is invalid/missing, fall back to the next
+                        # configured deployment candidate.
+                        if status_code == 404:
+                            break
+                        raise
 
             if last_error is not None:
                 raise last_error
@@ -120,9 +130,11 @@ class FoundryClient:
         headers: dict[str, str],
         *,
         api_version: str | None = None,
+        model: str | None = None,
     ) -> httpx.Response:
+        deployment = (model or "").strip() or self._models[0]
         url = (
-            f"{self._endpoint}/openai/deployments/{self._model}/chat/completions"
+            f"{self._endpoint}/openai/deployments/{deployment}/chat/completions"
             f"?api-version={api_version or self._api_version}"
         )
 
@@ -136,7 +148,7 @@ class FoundryClient:
         missing: list[str] = []
         if not self._endpoint:
             missing.append("FOUNDRY_ENDPOINT")
-        if not self._model:
+        if not self._models:
             missing.append("FOUNDRY_MODEL")
         if not self._api_key:
             missing.append("FOUNDRY_API_KEY")

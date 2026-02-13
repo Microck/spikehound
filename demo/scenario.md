@@ -1,4 +1,4 @@
-# TriageForge Demo Scenario
+# Spikehound Demo Scenario
 
 ## Overview
 
@@ -7,7 +7,7 @@ This demo shows the complete **multi-agent investigation pipeline** for a staged
 ## Prerequisites
 
 - Azure CLI is authenticated: `az account show` confirms subscription access
-- TriageForge server is running: `uvicorn web.app:app --app-dir src --port 8000`
+- Spikehound server is running: `uvicorn web.app:app --app-dir src --port 8000`
 - Slack app webhook URL and signing secret are configured in `.env`
 
 ## Staged Anomaly

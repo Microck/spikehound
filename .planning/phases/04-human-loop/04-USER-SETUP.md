@@ -17,7 +17,7 @@ Complete these items for Slack notification delivery, interactive approval butto
 
 ## Account Setup
 
-- [ ] **Create or open a Slack app for TriageForge**
+- [ ] **Create or open a Slack app for Spikehound**
   - URL: https://api.slack.com/apps
   - Skip if: You already have an app used for this incident channel
 
@@ -52,7 +52,7 @@ After completing setup, verify with:
 
 ```bash
 grep -E "SLACK_WEBHOOK_URL|SLACK_SIGNING_SECRET|SLACK_BOT_TOKEN|AZURE_SUBSCRIPTION_ID" .env
-. .venv/bin/activate && PYTHONPATH=src python3 -c "from integrations.slack import send_webhook; send_webhook('TriageForge Slack setup verification')"
+ . .venv/bin/activate && PYTHONPATH=src python3 -c "from integrations.slack import send_webhook; send_webhook('Spikehound Slack setup verification')"
 . .venv/bin/activate && PYTHONPATH=src python3 -c "from execution.remediation import execute_remediation; print('remediation module import ok')"
 ```
 

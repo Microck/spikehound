@@ -1,4 +1,4 @@
-# TriageForge
+# Spikehound
 
 Multi-agent system that automatically investigates and remediates Azure cost anomalies before humans join the call.
 
@@ -6,7 +6,7 @@ Multi-agent system that automatically investigates and remediates Azure cost ano
 
 ## What It Does
 
-TriageForge receives Azure Monitor cost alerts and runs a parallel investigation pipeline:
+Spikehound receives Azure Monitor cost alerts and runs a parallel investigation pipeline:
 
 1. **Coordinator Agent** receives the alert and orchestrates the investigation
 2. **Cost Analyst** queries Azure Cost Management API to identify top cost drivers
@@ -18,7 +18,7 @@ TriageForge receives Azure Monitor cost alerts and runs a parallel investigation
 
 ## Architecture
 
-![TriageForge Architecture](docs/architecture.png)
+![Spikehound Architecture](docs/architecture.png)
 
 ```
 Azure Monitor Alert
@@ -83,6 +83,7 @@ AZURE_AI_PROJECT_ENDPOINT=<your-foundry-endpoint>
 
 # Azure OpenAI / Foundry (optional: enables LLM-backed diagnosis)
 # FOUNDRY_MODEL is the Azure OpenAI *deployment name*.
+# You may provide a comma-separated list to allow smooth renames.
 FOUNDRY_ENDPOINT=<your-azure-openai-endpoint>
 FOUNDRY_MODEL=<your-deployment-name>
 FOUNDRY_API_KEY=<your-azure-openai-key>
