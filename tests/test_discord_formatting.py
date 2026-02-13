@@ -115,6 +115,22 @@ def test_discord_formatting_returns_non_empty_content_with_key_details() -> None
     assert any("GPU VM left running" in value for value in field_values)
     assert any("add_auto_shutdown" in value for value in field_values)
 
+    components = formatted["components"]
+    assert isinstance(components, list)
+    assert len(components) == 1
+
+    action_row = components[0]
+    assert action_row["type"] == 1
+    buttons = action_row["components"]
+    assert len(buttons) == 3
+
+    custom_ids = [button["custom_id"] for button in buttons]
+    assert set(custom_ids) == {
+        "approve_remediation:alert-discord-001",
+        "reject_remediation:alert-discord-001",
+        "investigate_more:alert-discord-001",
+    }
+
     allowed_mentions = formatted["allowed_mentions"]
     assert allowed_mentions == {"parse": []}
 
