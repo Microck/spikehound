@@ -111,18 +111,62 @@ def format_investigation_report_for_discord(report: Any) -> dict[str, Any]:
     root_cause_title = str(diagnosis_hypothesis.get("title") or "Unknown root cause")
     first_action = _first_remediation_action(remediation_data.get("actions"))
     alert_id = str(unified_findings.get("alert_id") or "unknown-alert")
+    received_at = str(unified_findings.get("received_at") or "")
 
-    content = "\n".join(
-        [
-            f"Incident Investigation Complete: {alert_id}",
-            f"Top cost driver(s): {cost_driver_text}",
-            f"Confidence: {confidence_text}",
-            f"Root cause: {root_cause_title}",
-            f"First remediation action: {first_action}",
-        ]
+    summary_line = (
+        f"Incident complete: {alert_id} | "
+        f"Driver(s): {cost_driver_text} | "
+        f"Confidence: {confidence_text}"
     )
+    content = _truncate(_sanitize_mentions(summary_line), 2000)
 
-    return {"content": content}
+    embed: dict[str, Any] = {
+        "title": _truncate("Incident Investigation Complete", 256),
+        "description": _truncate(
+            _sanitize_mentions(
+                "Automated investigation finished. Review root cause and remediation summary below."
+            ),
+            4096,
+        ),
+        "color": 0xF59E0B,
+        "fields": [
+            {
+                "name": "Alert ID",
+                "value": _truncate(_sanitize_mentions(alert_id), 1024),
+                "inline": False,
+            },
+            {
+                "name": "Top Cost Driver(s)",
+                "value": _truncate(_sanitize_mentions(cost_driver_text), 1024),
+                "inline": False,
+            },
+            {
+                "name": "Confidence",
+                "value": _truncate(_sanitize_mentions(confidence_text), 1024),
+                "inline": True,
+            },
+            {
+                "name": "First Action",
+                "value": _truncate(_sanitize_mentions(first_action), 1024),
+                "inline": True,
+            },
+            {
+                "name": "Root Cause",
+                "value": _truncate(_sanitize_mentions(root_cause_title), 1024),
+                "inline": False,
+            },
+        ],
+    }
+
+    timestamp = _coerce_iso_timestamp(received_at)
+    if timestamp is not None:
+        embed["timestamp"] = timestamp
+
+    return {
+        "content": content,
+        "embeds": [embed],
+        "allowed_mentions": {"parse": []},
+    }
 
 
 def _to_mapping(value: Any) -> dict[str, Any]:
@@ -177,3 +221,29 @@ def _first_remediation_action(actions: Any) -> str:
         _resource_label(target_resource_id) if target_resource_id else "unknown"
     )
     return f"{action_type} on {target_label}"
+
+
+def _truncate(text: str, max_length: int) -> str:
+    if len(text) <= max_length:
+        return text
+    if max_length <= 1:
+        return text[:max_length]
+    return f"{text[: max_length - 1]}…"
+
+
+def _sanitize_mentions(text: str) -> str:
+    sanitized = text.replace("@everyone", "@\u200beveryone")
+    sanitized = sanitized.replace("@here", "@\u200bhere")
+    sanitized = sanitized.replace("<@", "<@\u200b")
+    return sanitized
+
+
+def _coerce_iso_timestamp(value: str) -> str | None:
+    stripped = value.strip()
+    if not stripped:
+        return None
+    if stripped.endswith("Z"):
+        return stripped
+    if "+" in stripped:
+        return stripped
+    return None
