@@ -21,24 +21,24 @@
 
 ### Diagnosis (DIAG)
 
-- [ ] **DIAG-01**: Diagnosis Agent synthesizes multi-agent findings
-- [ ] **DIAG-02**: Diagnosis Agent produces root cause hypothesis
-- [ ] **DIAG-03**: Diagnosis Agent provides confidence scoring
-- [ ] **DIAG-04**: Remediation Agent suggests fix actions
+- [x] **DIAG-01**: Diagnosis Agent synthesizes multi-agent findings
+- [x] **DIAG-02**: Diagnosis Agent produces root cause hypothesis
+- [x] **DIAG-03**: Diagnosis Agent provides confidence scoring
+- [x] **DIAG-04**: Remediation Agent suggests fix actions
 
 ### Human Loop (HUMAN)
 
-- [ ] **HUMAN-01**: Slack webhook for investigation notifications
-- [ ] **HUMAN-02**: Human-readable summary in Slack message
-- [ ] **HUMAN-03**: Approval buttons (Approve/Reject/Investigate)
-- [ ] **HUMAN-04**: Remediation execution with approval
+- [x] **HUMAN-01**: Slack webhook for investigation notifications
+- [x] **HUMAN-02**: Human-readable summary in Slack message
+- [x] **HUMAN-03**: Approval buttons (Approve/Reject/Investigate)
+- [x] **HUMAN-04**: Remediation execution with approval
 
 ### Demo (DEMO)
 
-- [ ] **DEMO-01**: Staged cost anomaly scenario (GPU VM left running)
-- [ ] **DEMO-02**: 2-minute video showing full investigation flow
-- [ ] **DEMO-03**: README with architecture and setup instructions
-- [ ] **DEMO-04**: Architecture diagram showing all 6 agents
+- [x] **DEMO-01**: Staged cost anomaly scenario (GPU VM left running)
+- [ ] **DEMO-02**: 2-minute video showing full investigation flow *(manual recording/upload pending)*
+- [x] **DEMO-03**: README with architecture and setup instructions
+- [x] **DEMO-04**: Architecture diagram showing all 6 agents
 
 ---
 
@@ -78,17 +78,17 @@
 | INV-04 | Phase 2: Investigation | Complete | Incidents stored and retrievable |
 | INV-05 | Phase 2: Investigation | Complete | 3 agents run in parallel |
 | INV-06 | Phase 2: Investigation | Complete | Unified findings object produced |
-| DIAG-01 | Phase 3: Diagnosis | Pending | Findings synthesized |
-| DIAG-02 | Phase 3: Diagnosis | Pending | Root cause identified |
-| DIAG-03 | Phase 3: Diagnosis | Pending | Confidence score 0-100% |
-| DIAG-04 | Phase 3: Diagnosis | Pending | At least one fix suggested |
-| HUMAN-01 | Phase 4: Human Loop | Pending | Slack message received |
-| HUMAN-02 | Phase 4: Human Loop | Pending | Summary is readable |
-| HUMAN-03 | Phase 4: Human Loop | Pending | Buttons work |
-| HUMAN-04 | Phase 4: Human Loop | Pending | Fix executed on approval |
-| DEMO-01 | Phase 5: Demo | Pending | Scenario reproducible |
-| DEMO-02 | Phase 5: Demo | Pending | Video under 2 minutes |
-| DEMO-03 | Phase 5: Demo | Pending | README complete |
-| DEMO-04 | Phase 5: Demo | Pending | Diagram shows all agents |
+| DIAG-01 | Phase 3: Diagnosis | Complete | Findings synthesized |
+| DIAG-02 | Phase 3: Diagnosis | Complete | Root cause identified |
+| DIAG-03 | Phase 3: Diagnosis | Complete | Confidence score 0-100% |
+| DIAG-04 | Phase 3: Diagnosis | Complete | At least one fix suggested |
+| HUMAN-01 | Phase 4: Human Loop | Complete | Slack message received |
+| HUMAN-02 | Phase 4: Human Loop | Complete | Summary is readable |
+| HUMAN-03 | Phase 4: Human Loop | Complete | Buttons work |
+| HUMAN-04 | Phase 4: Human Loop | Complete | Fix executed on approval |
+| DEMO-01 | Phase 5: Demo | Complete | Scenario reproducible |
+| DEMO-02 | Phase 5: Demo | Pending | Video under 2 minutes *(manual recording/upload pending)* |
+| DEMO-03 | Phase 5: Demo | Complete | README complete |
+| DEMO-04 | Phase 5: Demo | Complete | Diagram shows all agents |
 
 **Coverage:** 22/22 requirements mapped (100%)
