@@ -88,12 +88,17 @@ Endpoints:
 - `POST /api/webhooks/slack/actions`
 - `POST /api/webhooks/discord/interactions`
 
+Alert endpoint behavior:
+- Inline mode (default): returns `200` with the investigation report payload.
+- Durable mode (`INCIDENT_WR_USE_DURABLE=true`): returns `202` with `{ mode, accepted, investigationId, instanceId }` after scheduling `CoordinatorOrchestrator`.
+
 ### 3. Configure env (optional)
 
 The hackathon demo runs without Azure creds by default (agents return structured degraded results).
 
 Optional environment variables:
 - `INCIDENT_WR_CLOUD_ENABLED=true` (enables cloud-backed agents when implemented/configured)
+- `INCIDENT_WR_USE_DURABLE=true` (use Durable orchestration scheduling from webhook instead of inline execution)
 - `SLACK_WEBHOOK_URL` (send Slack notifications)
 - `SLACK_SIGNING_SECRET` (verify Slack interactive callbacks)
 - `DISCORD_WEBHOOK_URL` (send Discord notifications)

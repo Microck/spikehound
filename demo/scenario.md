@@ -9,6 +9,7 @@ This demo shows the complete **multi-agent investigation pipeline** for a staged
 - Azure CLI is authenticated: `az account show` confirms subscription access
 - Spikehound Functions app is running: `cd dotnet/src/IncidentWarRoom.Functions && func start`
 - Slack app webhook URL and signing secret are configured in `.env`
+- `INCIDENT_WR_USE_DURABLE=false` for this demo flow (keeps webhook response/report synchronous)
 
 ## Staged Anomaly
 

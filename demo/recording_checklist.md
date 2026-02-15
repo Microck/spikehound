@@ -20,6 +20,10 @@ Use this checklist to produce a consistent, high-quality 2-minute demo video for
   - Verify: `.env` has `SLACK_WEBHOOK_URL` and `SLACK_SIGNING_SECRET`
   - Test: Slack test message sent (optional, but good for verification)
 
+- [ ] **Webhook mode set for synchronous demo**
+  - Verify: `INCIDENT_WR_USE_DURABLE=false` in `.env`
+  - Note: `true` schedules Durable orchestration and returns async `202`
+
 - [ ] **Demo VM is staged**
   - Verify: VM is running and tagged with `demo=true`
   - Run: `bash demo/stage_anomaly.sh --vm-name gpu-training-vm --resource-group ai-dev-days-hackathon-eu`

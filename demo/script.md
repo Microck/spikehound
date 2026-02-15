@@ -10,6 +10,7 @@ This script provides a precise, timecoded demo for the hackathon presentation. T
 2. **Spikehound Functions app is running:** `cd dotnet/src/IncidentWarRoom.Functions && func start`
 3. **Slack app is configured:** `.env` has `SLACK_WEBHOOK_URL` and `SLACK_SIGNING_SECRET`
 4. **Demo VM is staged:** Run `bash demo/stage_anomaly.sh --vm-name <vm> --resource-group <rg>` first
+5. **Inline mode for live narration:** set `INCIDENT_WR_USE_DURABLE=false` (durable mode returns async `202` scheduling response)
 
 ### Before Recording
 
