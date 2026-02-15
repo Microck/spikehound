@@ -58,6 +58,54 @@ Findings│  (Azure AI Search)       │
 
 ## Quick Start
 
+### Primary Stack: .NET 8 + Azure Functions (isolated)
+
+This repo has been migrated to a “perfect stack” Functions app under `dotnet/`.
+
+### 1. Run Tests (no external services)
+
+```bash
+cd dotnet
+/home/ubuntu/.dotnet/dotnet test
+```
+
+### 2. Run the Functions app locally
+
+Prereqs:
+- .NET 8 (already available here as `/home/ubuntu/.dotnet/dotnet`)
+- Azure Functions Core Tools v4 (`func`) for local hosting
+
+```bash
+cd dotnet/src/IncidentWarRoom.Functions
+func start
+```
+
+Local base URL (default): `http://localhost:7071`
+
+Endpoints:
+- `POST /api/webhooks/alert` (alert ingestion)
+- `GET /api/health`
+- `POST /api/webhooks/slack/actions`
+- `POST /api/webhooks/discord/interactions`
+
+### 3. Configure env (optional)
+
+The hackathon demo runs without Azure creds by default (agents return structured degraded results).
+
+Optional environment variables:
+- `INCIDENT_WR_CLOUD_ENABLED=true` (enables cloud-backed agents when implemented/configured)
+- `SLACK_WEBHOOK_URL` (send Slack notifications)
+- `SLACK_SIGNING_SECRET` (verify Slack interactive callbacks)
+- `DISCORD_WEBHOOK_URL` (send Discord notifications)
+- `DISCORD_INTERACTIONS_PUBLIC_KEY` (verify Discord interactions)
+
+Safety toggles:
+- `INCIDENT_WR_ALLOW_REMEDIATION_EXECUTION=true` (still requires explicit human approval)
+
+---
+
+### Legacy Stack: Python/FastAPI (kept for reference)
+
 ### 1. Install Dependencies
 
 ```bash
@@ -187,8 +235,10 @@ All remediation actions require explicit human approval via Slack buttons before
 
 ## Tech Stack
 
-- **Backend:** FastAPI (Python)
-- **Agents:** Async Python with Azure SDK
+- **Backend:** Azure Functions (isolated worker, .NET 8)
+- **Orchestration:** Durable Functions (fan-out/fan-in agent model)
+- **Core:** C# library (`dotnet/src/IncidentWarRoom.Core`) with parsing/signatures/coordinator logic
+- **Tests:** xUnit (`cd dotnet && dotnet test`)
 - **Azure Services:**
   - Cost Management API
   - Resource Graph
@@ -198,6 +248,9 @@ All remediation actions require explicit human approval via Slack buttons before
   - Azure Compute (remediation)
 - **Integration:** Slack Incoming Webhooks + Interactive Buttons
 - **AI:** Azure AI Foundry (Diagnosis Agent)
+
+Legacy:
+- Python/FastAPI implementation remains in `src/` for reference during migration.
 
 ## Development
 
