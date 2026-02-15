@@ -63,7 +63,13 @@ A multi-agent system that auto-debugs Azure cost anomalies before humans join th
 ## Constraints
 
 - **Timeline**: 5 weeks (Feb 10 - Mar 15, 2026)
-- **Tech Stack**: Python, Microsoft Agent Framework, Azure AI Foundry
+- **Perfect Tech Stack**:
+  - **Language**: .NET 8 (C#)
+  - **Compute**: Azure Functions (isolated worker) + Durable Functions (fan-out/fan-in orchestration)
+  - **Azure integration**: Azure SDK for Cost Management, Resource Graph, Monitor, Compute; `Azure.AI.Projects` for Foundry/Agents
+  - **Observability**: Application Insights + OpenTelemetry
+  - **Testing**: xUnit + FluentAssertions
+  - **Local dev**: `func start` for Functions + Azurite (optional) for local storage emulation
 - **Model Access**: GPT-4o via Foundry
 - **Storage**: Azure Cosmos DB (incidents), Azure AI Search (RAG)
 - **Azure APIs**: Cost Management, Resource Graph, Monitor
