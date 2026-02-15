@@ -13,8 +13,8 @@ Use this checklist to produce a consistent, high-quality 2-minute demo video for
   - Optional: `az account show --query '{user:user.name, subscription:id}' -o json`
 
 - [ ] **Spikehound server is running**
-  - Verify: `curl http://localhost:8000/health` returns `{"ok":true}`
-  - Terminal 1 shows: `INFO:     Application startup complete`
+  - Verify: `curl http://localhost:7071/api/health` returns `{"ok":true}`
+  - Terminal 1 shows Functions host startup logs
 
 - [ ] **Slack app configured**
   - Verify: `.env` has `SLACK_WEBHOOK_URL` and `SLACK_SIGNING_SECRET`
@@ -121,7 +121,7 @@ Use this checklist to produce a consistent, high-quality 2-minute demo video for
 - [ ] Timestamp segment is clear (0:45 mark in server logs)
 
 **Expected one-liners:**
-- "Trigger: POST /webhooks/alert"
+- "Trigger: POST /api/webhooks/alert"
 - "Logs: 6 agents running in parallel"
 - "Investigation completed in 15 seconds"
 
@@ -251,14 +251,14 @@ Use this checklist to produce a consistent, high-quality 2-minute demo video for
 ## Quick Reference Commands
 
 ```bash
-# Start server (Terminal 1)
-uvicorn web.app:app --app-dir src --port 8000
+# Start Functions app (Terminal 1)
+cd dotnet/src/IncidentWarRoom.Functions && func start
 
 # Check health
-curl http://localhost:8000/health
+curl http://localhost:7071/api/health
 
 # Trigger demo alert (Terminal 2)
-curl -X POST http://localhost:8000/webhooks/alert \
+curl -X POST http://localhost:7071/api/webhooks/alert \
   -H 'Content-Type: application/json' \
   -d @demo-alert-payload.json
 

@@ -7,7 +7,7 @@ This demo shows the complete **multi-agent investigation pipeline** for a staged
 ## Prerequisites
 
 - Azure CLI is authenticated: `az account show` confirms subscription access
-- Spikehound server is running: `uvicorn web.app:app --app-dir src --port 8000`
+- Spikehound Functions app is running: `cd dotnet/src/IncidentWarRoom.Functions && func start`
 - Slack app webhook URL and signing secret are configured in `.env`
 
 ## Staged Anomaly
@@ -24,14 +24,14 @@ This demo shows the complete **multi-agent investigation pipeline** for a staged
 
 ### Option A: Real Azure Monitor Alert (if configured)
 
-If you've configured an Azure Monitor cost alert rule, it will fire automatically when the anomaly threshold is breached. The webhook endpoint `/webhooks/alert` will receive the alert payload.
+If you've configured an Azure Monitor cost alert rule, it will fire automatically when the anomaly threshold is breached. The webhook endpoint `/api/webhooks/alert` will receive the alert payload.
 
 ### Option B: Manual Webhook Trigger (reliable for demo)
 
 Use this `curl` command to simulate a real Azure Monitor alert:
 
 ```bash
-curl -X POST http://localhost:8000/webhooks/alert \
+curl -X POST http://localhost:7071/api/webhooks/alert \
   -H 'Content-Type: application/json' \
   -d '{
     "schemaId": "azureMonitorCommonAlertSchema",

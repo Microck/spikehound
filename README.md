@@ -23,7 +23,7 @@ Spikehound receives Azure Monitor cost alerts and runs a parallel investigation 
 ```
 Azure Monitor Alert
        ↓
-Coordinator Webhook (/webhooks/alert)
+ Coordinator Webhook (/api/webhooks/alert)
        ↓
   ┌────┬─────────────────────────┬─────────────┐
   ↓    │                         │              │
