@@ -47,3 +47,7 @@ artifacts/
 recordings/
 test-results/
 playwright-report/
+
+# .NET build artifacts
+dotnet/**/bin/
+dotnet/**/obj/
