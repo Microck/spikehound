@@ -1,0 +1,12 @@
+/home/ubuntu/workspace/ai-dev-days-hackathon/projects/incident-war-room/dotnet/src/IncidentWarRoom.Core/bin/Debug/net8.0/IncidentWarRoom.Core.deps.json
+/home/ubuntu/workspace/ai-dev-days-hackathon/projects/incident-war-room/dotnet/src/IncidentWarRoom.Core/bin/Debug/net8.0/IncidentWarRoom.Core.dll
+/home/ubuntu/workspace/ai-dev-days-hackathon/projects/incident-war-room/dotnet/src/IncidentWarRoom.Core/bin/Debug/net8.0/IncidentWarRoom.Core.pdb
+/home/ubuntu/workspace/ai-dev-days-hackathon/projects/incident-war-room/dotnet/src/IncidentWarRoom.Core/obj/Debug/net8.0/IncidentWarRoom.Core.GeneratedMSBuildEditorConfig.editorconfig
+/home/ubuntu/workspace/ai-dev-days-hackathon/projects/incident-war-room/dotnet/src/IncidentWarRoom.Core/obj/Debug/net8.0/IncidentWarRoom.Core.AssemblyInfoInputs.cache
+/home/ubuntu/workspace/ai-dev-days-hackathon/projects/incident-war-room/dotnet/src/IncidentWarRoom.Core/obj/Debug/net8.0/IncidentWarRoom.Core.AssemblyInfo.cs
+/home/ubuntu/workspace/ai-dev-days-hackathon/projects/incident-war-room/dotnet/src/IncidentWarRoom.Core/obj/Debug/net8.0/IncidentWarRoom.Core.csproj.CoreCompileInputs.cache
+/home/ubuntu/workspace/ai-dev-days-hackathon/projects/incident-war-room/dotnet/src/IncidentWarRoom.Core/obj/Debug/net8.0/IncidentWarRoom.Core.sourcelink.json
+/home/ubuntu/workspace/ai-dev-days-hackathon/projects/incident-war-room/dotnet/src/IncidentWarRoom.Core/obj/Debug/net8.0/IncidentWarRoom.Core.dll
+/home/ubuntu/workspace/ai-dev-days-hackathon/projects/incident-war-room/dotnet/src/IncidentWarRoom.Core/obj/Debug/net8.0/refint/IncidentWarRoom.Core.dll
+/home/ubuntu/workspace/ai-dev-days-hackathon/projects/incident-war-room/dotnet/src/IncidentWarRoom.Core/obj/Debug/net8.0/IncidentWarRoom.Core.pdb
+/home/ubuntu/workspace/ai-dev-days-hackathon/projects/incident-war-room/dotnet/src/IncidentWarRoom.Core/obj/Debug/net8.0/ref/IncidentWarRoom.Core.dll
