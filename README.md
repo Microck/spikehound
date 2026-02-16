@@ -1,88 +1,67 @@
 # Spikehound
 
-Multi-agent system that automatically investigates and remediates Azure cost anomalies before humans join the call.
+Spikehound is a multi-agent system that investigates Azure cost anomalies and proposes safe-by-default remediation before humans join the call.
 
-**Built for:** Microsoft AI Dev Days Hackathon 2026
+Built for: Microsoft AI Dev Days Hackathon 2026
+Categories: Agentic DevOps, Best Multi-Agent System, Best Azure Integration
+Demo video: <paste hosted link>
 
 ## What It Does
 
-Spikehound receives Azure Monitor cost alerts and runs a parallel investigation pipeline:
+Spikehound receives an alert (Azure Monitor common schema payload) and runs a parallel investigation:
 
-1. **Coordinator Agent** receives the alert and orchestrates the investigation
-2. **Cost Analyst** queries Azure Cost Management API to identify top cost drivers
-3. **Resource Agent** queries Azure Resource Graph and Activity Logs to find resource details and recent changes
-4. **History Agent** searches Azure AI Search (RAG) for similar past incidents
-5. **Diagnosis Agent** synthesizes all findings into a root cause hypothesis with confidence score
-6. **Remediation Agent** suggests fix actions (e.g., stop VM) with human approval requirement
-7. **Human Loop** receives a Slack notification with Approve/Reject/Investigate buttons; approved actions execute automatically
+- Coordinator: receives the alert and orchestrates the run
+- Cost Analyst: identifies top cost drivers via Azure Cost Management (optional live)
+- Resource Agent: pulls resource details and recent changes (optional live)
+- History Agent: searches for similar incidents (optional live)
+- Diagnosis Agent: synthesizes findings into a root-cause hypothesis + confidence
+- Remediation Agent: proposes actions that require human approval
+- Human loop: posts to Slack (Approve/Reject/Investigate); approved actions can execute
 
 ## Architecture
 
 ![Spikehound Architecture](docs/architecture.png)
 
-```
-Azure Monitor Alert
-       ↓
- Coordinator Webhook (/api/webhooks/alert)
-       ↓
-  ┌────┬─────────────────────────┬─────────────┐
-  ↓    │                         │              │
-Cost   │    History                │
-Agent  │    Agent                  │
-  ↓    │    ↓                     │
-Cost   │  Similar Incidents        │
-Findings│  (Azure AI Search)       │
-  ↓    │                         │
-  └────┴─────────────────────────┴─────────────┘
-              ↓
-        Unified Findings
-              ↓
-      Diagnosis Agent
-              ↓
-    Root Cause (85% confidence)
-              ↓
-    Remediation Agent
-              ↓
-  Remediation Plan (requires approval)
-              ↓
-     Slack Notification
-  (Approve/Reject/Investigate buttons)
-              ↓
-    [Human clicks Approve]
-              ↓
-      Remediation Execution
-  (Azure Compute: stop_vm)
-              ↓
-    Follow-up Slack Message
+```text
+Alert -> /api/webhooks/alert -> parallel agents -> diagnosis -> remediation plan
+  -> Slack message (buttons) -> approved execution -> follow-up message
 ```
 
-## Quick Start
+## Quickstart (Local)
 
-### Primary Stack: .NET 8 + Azure Functions (isolated)
+This project uses a "perfect stack" .NET 8 Azure Functions app under `dotnet/`.
 
-This repo has been migrated to a “perfect stack” Functions app under `dotnet/`.
+Prereqs:
+- .NET 8
+- Azure Functions Core Tools v4 (`func`) to run locally
 
-### 1. Run Tests (no external services)
+1. Run unit tests (no external services):
 
 ```bash
 cd dotnet
 /home/ubuntu/.dotnet/dotnet test
 ```
 
-### 2. Run the Functions app locally
-
-Prereqs:
-- .NET 8 (already available here as `/home/ubuntu/.dotnet/dotnet`)
-- Azure Functions Core Tools v4 (`func`) for local hosting
+2. Start the Functions app:
 
 ```bash
 cd dotnet/src/IncidentWarRoom.Functions
 func start
 ```
 
+3. Confirm health:
+
+```bash
+curl -sS http://localhost:7071/api/health
+```
+
+4. Trigger the demo investigation:
+- Follow `demo/scenario.md` (manual `curl` payload).
+
+## Endpoints
+
 Local base URL (default): `http://localhost:7071`
 
-Endpoints:
 - `POST /api/webhooks/alert` (alert ingestion)
 - `GET /api/health`
 - `POST /api/webhooks/slack/actions`
@@ -90,101 +69,50 @@ Endpoints:
 
 Alert endpoint behavior:
 - Inline mode (default): returns `200` with the investigation report payload.
-- Durable mode (`INCIDENT_WR_USE_DURABLE=true`): returns `202` with `{ mode, accepted, investigationId, instanceId }` after scheduling `CoordinatorOrchestrator`.
+- Durable mode (`INCIDENT_WR_USE_DURABLE=true`): returns `202` after scheduling orchestration.
 
-### 3. Configure env (optional)
+## Configuration
 
-The hackathon demo runs without Azure creds by default (agents return structured degraded results).
+See `.env.example`.
 
-Optional environment variables:
-- `INCIDENT_WR_CLOUD_ENABLED=true` (enables cloud-backed agents when implemented/configured)
-- `INCIDENT_WR_USE_DURABLE=true` (use Durable orchestration scheduling from webhook instead of inline execution)
-- `SLACK_WEBHOOK_URL` (send Slack notifications)
-- `SLACK_SIGNING_SECRET` (verify Slack interactive callbacks)
-- `DISCORD_WEBHOOK_URL` (send Discord notifications)
-- `DISCORD_INTERACTIONS_PUBLIC_KEY` (verify Discord interactions)
+Notes:
+- The demo is designed to run without Azure credentials by default (agents return structured degraded results).
+- Real Slack button clicks require the Functions host to be publicly reachable (ngrok or similar).
 
-Safety toggles:
-- `INCIDENT_WR_ALLOW_REMEDIATION_EXECUTION=true` (still requires explicit human approval)
+## Verification
 
----
-
-Legacy implementation note:
-
-- The previous Python/FastAPI implementation has been archived privately (repo: `Microck/legacy-python-archives`, path: `spikehound/`) and removed from this repo to keep the primary stack clean.
-
-## Demo
-
-For a complete, reproducible demo scenario, see [demo/scenario.md](demo/scenario.md).
-
-The demo shows:
-- A staged GPU VM cost anomaly (\$450/day vs \$12.50/day baseline)
-- Multi-agent investigation pipeline in action
-- Slack notification with approval buttons
-- Remediation execution (stop VM) after approval
-
-## Safety
-
-### Human Approval Required
-
-All remediation actions require explicit human approval via Slack buttons before execution.
-
-**Safe-by-default:**
-- Actions are marked with `human_approval_required=True`
-- Only "Approve" triggers execution
-- "Reject" and "Investigate More" only record the decision
-
-### No Production Deployment
-
-**Out of scope:**
-- Auto-scaling configurations
-- Production CI/CD pipelines
-- Multi-tenant deployment
-- Persistent state storage (approvals are in-memory for demo)
-
-## Limitations
-
-- **Slack interactivity:** Server must be publicly accessible (via ngrok or similar) to receive real Slack button clicks
-- **Azure credentials:** Requires service principal or Azure CLI auth; managed identity only works on Azure VMs
-- **Foundry dependency:** Diagnosis Agent degrades gracefully when Azure AI Foundry is unavailable
-- **Demo-only:** Approval records are stored in-memory; production would need persistent storage
-
-## Tech Stack
-
-- **Backend:** Azure Functions (isolated worker, .NET 8)
-- **Orchestration:** Durable Functions (fan-out/fan-in agent model)
-- **Core:** C# library (`dotnet/src/IncidentWarRoom.Core`) with parsing/signatures/coordinator logic
-- **Tests:** xUnit (`cd dotnet && dotnet test`)
-- **Azure Services:**
-  - Cost Management API
-  - Resource Graph
-  - Activity Logs
-  - Azure AI Search (optional)
-  - Cosmos DB (optional for History)
-  - Azure Compute (remediation)
-- **Integration:** Slack Incoming Webhooks + Interactive Buttons
-- **AI:** Azure AI Foundry (Diagnosis Agent)
-
-## Development
-
-### Running Tests
+Automated:
 
 ```bash
 cd dotnet
 /home/ubuntu/.dotnet/dotnet test
 ```
 
-### Project Structure
+Manual (live integrations):
+- Start Functions (`func start`) and hit `/api/health`.
+- Run the end-to-end scenario in `demo/scenario.md`.
+- Click Slack buttons in a real Slack channel and confirm callbacks are verified + recorded.
 
-```
+## Safety
+
+Safe-by-default invariants:
+- Remediation actions require explicit human approval.
+- Execution is gated behind runtime flags (even after approval).
+
+Out of scope for v1:
+- Production hardening and persistent approvals store
+
+## Repo Layout
+
+```text
 incident-war-room/
-├── dotnet/               # .NET 8 Azure Functions + Core library + tests
-├── demo/                 # Demo scenario and scripts
-├── docs/                 # Architecture diagram (Mermaid + PNG)
-├── .planning/            # GSD plans and state
-└── .env.example          # Environment variables template
+  dotnet/    .NET 8 Azure Functions app + core library + tests
+  demo/      demo scenario + staging/cleanup scripts
+  docs/      architecture diagram source + rendered image
+  .planning/ build plans and state
+  .env.example
 ```
 
 ## License
 
-MIT License — see LICENSE file for details.
+Apache-2.0 (see `LICENSE`).
