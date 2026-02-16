@@ -1,64 +1,56 @@
 # Spikehound
 
-Spikehound is a multi-agent system that investigates Azure cost anomalies and proposes safe-by-default remediation before humans join the call.
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-Built for: Microsoft AI Dev Days Hackathon 2026
-Categories: Agentic DevOps, Best Multi-Agent System, Best Azure Integration
-Demo video: <paste hosted link>
+Spikehound is a multi-agent incident workflow for Azure cost anomalies.
 
-## What It Does
+It ingests an alert payload, fans out to specialized investigators (cost, resource config, history), synthesizes a diagnosis, and proposes remediation with a human approval gate.
 
-Spikehound receives an alert (Azure Monitor common schema payload) and runs a parallel investigation:
+## Features
 
-- Coordinator: receives the alert and orchestrates the run
-- Cost Analyst: identifies top cost drivers via Azure Cost Management (optional live)
-- Resource Agent: pulls resource details and recent changes (optional live)
-- History Agent: searches for similar incidents (optional live)
-- Diagnosis Agent: synthesizes findings into a root-cause hypothesis + confidence
-- Remediation Agent: proposes actions that require human approval
-- Human loop: posts to Slack (Approve/Reject/Investigate); approved actions can execute
+- Parallel investigation pipeline with clear agent roles
+- Webhook ingestion for alert payloads
+- Optional human-in-the-loop notifications (Slack / Discord)
+- Safe-by-default remediation: explicit approval required
+- Runs as a .NET 8 Azure Functions app (isolated worker)
 
-## Architecture
-
-![Spikehound Architecture](docs/architecture.png)
-
-```text
-Alert -> /api/webhooks/alert -> parallel agents -> diagnosis -> remediation plan
-  -> Slack message (buttons) -> approved execution -> follow-up message
-```
-
-## Quickstart (Local)
-
-This project uses a "perfect stack" .NET 8 Azure Functions app under `dotnet/`.
+## Getting Started
 
 Prereqs:
 - .NET 8
-- Azure Functions Core Tools v4 (`func`) to run locally
+- Azure Functions Core Tools v4 (`func`) for local hosting
 
-1. Run unit tests (no external services):
+1. Run tests:
 
 ```bash
 cd dotnet
 /home/ubuntu/.dotnet/dotnet test
 ```
 
-2. Start the Functions app:
+2. Start the Functions host:
 
 ```bash
 cd dotnet/src/IncidentWarRoom.Functions
 func start
 ```
 
-3. Confirm health:
+3. Confirm the service is up:
 
 ```bash
 curl -sS http://localhost:7071/api/health
 ```
 
-4. Trigger the demo investigation:
-- Follow `demo/scenario.md` (manual `curl` payload).
+## Usage
 
-## Endpoints
+Trigger an investigation using the demo payload in `demo/scenario.md`.
+
+High-level flow:
+
+```text
+alert -> /api/webhooks/alert -> parallel agents -> diagnosis -> remediation plan
+```
+
+## API
 
 Local base URL (default): `http://localhost:7071`
 
@@ -73,46 +65,42 @@ Alert endpoint behavior:
 
 ## Configuration
 
-See `.env.example`.
+Copy `.env.example` to `.env` and set what you need.
 
 Notes:
 - The demo is designed to run without Azure credentials by default (agents return structured degraded results).
-- Real Slack button clicks require the Functions host to be publicly reachable (ngrok or similar).
+- Real Slack interactive callbacks require a publicly reachable URL (ngrok or similar).
 
-## Verification
+## Architecture
 
-Automated:
+![Spikehound Architecture](docs/architecture.png)
+
+Diagram sources:
+- Mermaid: `docs/architecture.mmd`
+- Rendered image: `docs/architecture.png`
+
+## Development
 
 ```bash
 cd dotnet
 /home/ubuntu/.dotnet/dotnet test
 ```
 
-Manual (live integrations):
-- Start Functions (`func start`) and hit `/api/health`.
-- Run the end-to-end scenario in `demo/scenario.md`.
-- Click Slack buttons in a real Slack channel and confirm callbacks are verified + recorded.
+## Security
 
-## Safety
+This project may execute remediation actions when enabled. Treat credentials and webhooks as sensitive.
 
-Safe-by-default invariants:
-- Remediation actions require explicit human approval.
-- Execution is gated behind runtime flags (even after approval).
+- Prefer running in a dedicated demo subscription.
+- Do not point remediation at production resources.
 
-Out of scope for v1:
-- Production hardening and persistent approvals store
+## Contributing
 
-## Repo Layout
-
-```text
-incident-war-room/
-  dotnet/    .NET 8 Azure Functions app + core library + tests
-  demo/      demo scenario + staging/cleanup scripts
-  docs/      architecture diagram source + rendered image
-  .planning/ build plans and state
-  .env.example
-```
+Issues and pull requests are welcome.
 
 ## License
 
 Apache-2.0 (see `LICENSE`).
+
+## Origin
+
+Spikehound was built during a hackathon and optimized for a reproducible demo, but the repository is structured as a normal OSS project.
