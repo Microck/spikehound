@@ -6,6 +6,25 @@ Spikehound is a multi-agent incident workflow for Azure cost anomalies.
 
 It ingests an alert payload, fans out to specialized investigators (cost, resource config, history), synthesizes a diagnosis, and proposes remediation with a human approval gate.
 
+<!-- top-readme: begin -->
+## Installation
+
+- [`dotnet/IncidentWarRoom.sln`](dotnet/IncidentWarRoom.sln)
+- [`dotnet/src/IncidentWarRoom.Functions/IncidentWarRoom.Functions.csproj`](dotnet/src/IncidentWarRoom.Functions/IncidentWarRoom.Functions.csproj)
+
+## Testing
+
+- [`dotnet/tests/IncidentWarRoom.Core.Tests/IncidentWarRoom.Core.Tests.csproj`](dotnet/tests/IncidentWarRoom.Core.Tests/IncidentWarRoom.Core.Tests.csproj)
+
+## Support / Community
+
+## Changelog / Releases
+
+## Roadmap
+
+- [`.planning/ROADMAP.md`](.planning/ROADMAP.md)
+<!-- top-readme: end -->
+
 ## Features
 
 - Parallel investigation pipeline with clear agent roles
@@ -14,27 +33,21 @@ It ingests an alert payload, fans out to specialized investigators (cost, resour
 - Safe-by-default remediation: explicit approval required
 - Runs as a .NET 8 Azure Functions app (isolated worker)
 
-## Getting Started
+## Quickstart (local)
 
 Prereqs:
-- .NET 8
-- Azure Functions Core Tools v4 (`func`) for local hosting
-
-1. Run tests:
+- .NET 8 SDK
+- Azure Functions Core Tools v4 (`func`)
 
 ```bash
+cp .env.example .env
+set -a; source .env; set +a
+
 cd dotnet
-/home/ubuntu/.dotnet/dotnet test
-```
-
-2. Start the Functions host:
-
-```bash
-cd dotnet/src/IncidentWarRoom.Functions
+dotnet test
+cd src/IncidentWarRoom.Functions
 func start
 ```
-
-3. Confirm the service is up:
 
 ```bash
 curl -sS http://localhost:7071/api/health
@@ -65,11 +78,18 @@ Alert endpoint behavior:
 
 ## Configuration
 
-Copy `.env.example` to `.env` and set what you need.
+Copy `.env.example` to `.env` and set what you need (the Functions host reads standard process environment variables).
+
+If you keep config in `.env`, load it into your shell before `func start`:
+
+```bash
+set -a; source .env; set +a
+```
 
 Notes:
 - The demo is designed to run without Azure credentials by default (agents return structured degraded results).
 - Real Slack interactive callbacks require a publicly reachable URL (ngrok or similar).
+- Do not commit `.env` (it is gitignored). If you ever paste real webhook URLs or keys into git, rotate them.
 
 ## Architecture
 
@@ -83,7 +103,7 @@ Diagram sources:
 
 ```bash
 cd dotnet
-/home/ubuntu/.dotnet/dotnet test
+dotnet test
 ```
 
 ## Security
