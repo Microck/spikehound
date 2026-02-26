@@ -2,13 +2,15 @@
 
 # docs/render_architecture.sh
 #
-# Renders the Mermaid architecture diagram to SVG.
+# Renders the Mermaid architecture diagram to SVG (light + dark variants).
 #
 # Prerequisites:
 # - Node.js 18+ and npm (preferred)
 # - OR Docker (fallback)
 #
-# Output: docs/architecture.svg
+# Output:
+#   docs/architecture-light.svg   (light theme)
+#   docs/architecture-dark.svg    (dark theme)
 
 set -e
 
@@ -17,45 +19,49 @@ echo "Rendering Architecture Diagram"
 echo "=========================================="
 
 render_with_npx() {
-  npx -y @mermaid-js/mermaid-cli -i docs/architecture.mmd -o docs/architecture.svg
+  local theme="$1"
+  local output="$2"
+  npx -y @mermaid-js/mermaid-cli \
+    -i docs/architecture.mmd \
+    -o "$output" \
+    --theme "$theme"
 }
 
 render_with_docker() {
+  local theme="$1"
+  local output="$2"
   docker run --rm \
     -u "$(id -u):$(id -g)" \
     -v "$PWD:/data" \
     minlag/mermaid-cli \
     -i /data/docs/architecture.mmd \
-    -o /data/docs/architecture.svg
+    -o "/data/$output" \
+    --theme "$theme"
 }
 
 if command -v npx &>/dev/null; then
   echo "Found: npx (using npm/npx)"
   echo ""
 
-  echo "+ npx -y @mermaid-js/mermaid-cli -i docs/architecture.mmd -o docs/architecture.svg"
-  if render_with_npx; then
-    echo "✓ Architecture diagram rendered to docs/architecture.svg (npx)"
-  else
-    echo "✗ npx render failed"
-    if command -v docker &>/dev/null; then
-      echo ""
-      echo "Found: Docker (falling back to containerized mermaid-cli)"
-      echo "+ docker run --rm -u \"$(id -u):$(id -g)\" -v \"$PWD:/data\" minlag/mermaid-cli -i /data/docs/architecture.mmd -o /data/docs/architecture.svg"
-      render_with_docker
-      echo "✓ Architecture diagram rendered to docs/architecture.svg (docker fallback)"
-    else
-      echo "No Docker available for fallback."
-      exit 1
-    fi
-  fi
+  for pair in "default:docs/architecture-light.svg" "dark:docs/architecture-dark.svg"; do
+    theme="${pair%%:*}"
+    output="${pair##*:}"
+    echo "+ npx mmdc --theme $theme -o $output"
+    render_with_npx "$theme" "$output"
+    echo "✓ $output"
+  done
 
 elif command -v docker &>/dev/null; then
   echo "Found: Docker (using containerized mermaid-cli)"
   echo ""
-  echo "+ docker run --rm -u \"$(id -u):$(id -g)\" -v \"$PWD:/data\" minlag/mermaid-cli -i /data/docs/architecture.mmd -o /data/docs/architecture.svg"
-  render_with_docker
-  echo "✓ Architecture diagram rendered to docs/architecture.svg (docker)"
+
+  for pair in "default:docs/architecture-light.svg" "dark:docs/architecture-dark.svg"; do
+    theme="${pair%%:*}"
+    output="${pair##*:}"
+    echo "+ docker run ... --theme $theme -o $output"
+    render_with_docker "$theme" "$output"
+    echo "✓ $output"
+  done
 
 else
   echo ""
@@ -75,16 +81,10 @@ else
   echo "  Visit: https://docs.docker.com/get-docker/"
   echo "  Verify: docker --version"
   echo ""
-  echo "Option 3: Provide pre-rendered image"
-  echo "  Render docs/architecture.mmd to SVG manually"
-  echo "  Save as: docs/architecture.svg"
+  echo "Option 3: Provide pre-rendered images"
+  echo "  Render docs/architecture.mmd manually"
+  echo "  Save as: docs/architecture-light.svg and docs/architecture-dark.svg"
   echo ""
-  exit 1
-fi
-
-if [[ ! -s docs/architecture.svg ]]; then
-  echo ""
-  echo "ERROR: docs/architecture.svg was not created or is empty"
   exit 1
 fi
 
@@ -93,6 +93,11 @@ echo "=========================================="
 echo "Render Complete"
 echo "=========================================="
 echo ""
-echo "Output file: docs/architecture.svg"
-echo "File size: $(du -h docs/architecture.svg)"
+for f in docs/architecture-light.svg docs/architecture-dark.svg; do
+  if [[ -s "$f" ]]; then
+    echo "  $f  ($(du -h "$f" | cut -f1))"
+  else
+    echo "  WARNING: $f was not created or is empty"
+  fi
+done
 echo ""

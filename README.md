@@ -150,7 +150,8 @@ spikehound/
 │   └── cleanup_demo.sh               # Tear down demo infra
 ├── docs/
 │   ├── architecture.mmd              # Mermaid source
-│   ├── architecture.svg              # Rendered diagram (SVG)
+│   ├── architecture-light.svg        # Rendered diagram (light mode)
+│   ├── architecture-dark.svg         # Rendered diagram (dark mode)
 │   └── render_architecture.sh        # Diagram render script
 ├── infra/
 │   └── foundry_config.yaml           # Azure AI Foundry project config
@@ -267,7 +268,10 @@ Supported interaction types: `approve_remediation`, `reject_remediation`, `inves
 
 ## Architecture
 
-![Spikehound Architecture](docs/architecture.svg)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/architecture-dark.svg">
+  <img alt="Spikehound Architecture" src="docs/architecture-light.svg">
+</picture>
 
 **Agents and their roles:**
 
