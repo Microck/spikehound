@@ -3,8 +3,6 @@
   <img alt="Spikehound" src="docs/brand/logo-horizontal.svg" width="640">
 </picture>
 
-# Spikehound
-
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![CI](https://github.com/Microck/spikehound/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Microck/spikehound/actions/workflows/ci-cd.yml)
 
