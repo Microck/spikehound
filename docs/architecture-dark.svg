@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2026.9499999999998 3000.15" style="--bg:#0d1117;--fg:#e6edf3;--line:#3d444d;--accent:#4493f8;--muted:#9198a1;background:var(--bg)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 529.75 622.5" style="--bg:#0d1117;--fg:#e6edf3;--line:#3d444d;--accent:#4493f8;--muted:#9198a1;background:var(--bg)">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
   text { font-family: 'Inter', system-ui, sans-serif; }
@@ -26,95 +26,48 @@
     <polygon points="8 0, 0 2.4, 8 4.8" fill="var(--_arrow)" />
   </marker>
 </defs>
-<rect x="32" y="391" width="1309.35" height="810" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
-<rect x="32" y="391" width="1309.35" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
-<text x="44" y="405" dy="0.35em" font-size="12" font-weight="600" fill="var(--_text-sec)">&quot;Inline — CoordinatorPipeline&quot;</text>
-<rect x="394.5999999999999" y="427" width="926.75" height="108" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
-<rect x="394.5999999999999" y="427" width="926.75" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
-<text x="406.5999999999999" y="441" dy="0.35em" font-size="12" font-weight="600" fill="var(--_text-sec)">&quot;Parallel Investigation  Task.WhenAll&quot;</text>
-<rect x="1361.35" y="409" width="633.6" height="792" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
-<rect x="1361.35" y="409" width="633.6" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
-<text x="1373.35" y="423" dy="0.35em" font-size="12" font-weight="600" fill="var(--_text-sec)">&quot;Durable — CoordinatorOrchestrator&quot;</text>
-<polyline points="845.2874999999999,68 845.2874999999999,248" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="845.2874999999999,284 845.2874999999999,302 213.29999999999995,302 213.29999999999995,715 621.1374999999999,715" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="845.2874999999999,284 845.2874999999999,302 1465.2749999999999,302 1465.2749999999999,481" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="555.7249999999999,517 555.7249999999999,715 621.1374999999999,715" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="847.25,517 847.25,715 781.8375,715" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="1149.5,517 1149.5,715 781.8375,715" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="701.4875,733 701.4875,913" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="701.4875,949 701.4875,1129" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="1465.2749999999999,517 1465.2749999999999,715 1583.5,715" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="1667.425,517 1667.425,697" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="1880.3,517 1880.3,715 1751.35,715" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="1667.425,733 1667.425,913" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="1667.425,949 1667.425,1129" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="701.4875,1165 701.4875,1183 148.6500000000001,1183 148.6500000000001,1363 285.1374999999998,1363" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="701.4875,1165 701.4875,1183 1234.6999999999998,1183 1234.6999999999998,1219 1377.35,1219 1377.35,1363 1679.2124999999996,1363" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="1667.425,1165 1667.425,1183 1444.675,1183 1444.675,1219 1357.35,1219 1357.35,1363 495.8874999999998,1363" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="1667.425,1165 1667.425,1183 1927.625,1183 1927.625,1363 1868.5124999999998,1363" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="390.5124999999998,1381 390.5124999999998,1596 984.7499999999998,1596" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="1773.8624999999997,1381 1773.8624999999997,1596 1238.3999999999999,1596" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="1111.5749999999998,1614 1111.5749999999998,1810.9999999999998" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="1011.3350057508344,2202.9100057508344 1011.3350057508344,2321.15 930.0625,2321.15 930.0625,2500.15" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="1211.8149942491652,2202.9100057508344 1211.8149942491652,2321.15 1293.0874999999999,2321.15 1293.0874999999999,2500.15" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="930.0625,2536.15 930.0625,2716.15" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<polyline points="930.0625,2752.15 930.0625,2932.15" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
-<rect x="47.99999999999994" y="485.5" width="330.6" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
-<text x="213.29999999999995" y="499" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">&quot;SPIKEHOUND_USE_DURABLE=false&amp;#10;200 OK + full report&quot;</text>
-<rect x="1288.5349999999999" y="369" width="353.48" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
-<text x="1465.2749999999999" y="382.5" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">&quot;SPIKEHOUND_USE_DURABLE=true&amp;#10;202 Accepted + instanceId&quot;</text>
-<rect x="290.99249999999984" y="1466" width="199.04000000000002" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
-<text x="390.5124999999998" y="1479.5" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">&quot;approve / reject / investigate&quot;</text>
-<rect x="1674.3424999999997" y="1466" width="199.04000000000002" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
-<text x="1773.8624999999997" y="1479.5" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">&quot;approve / reject / investigate&quot;</text>
-<rect x="1046.3749999999998" y="1699" width="130.4" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
-<text x="1111.5749999999998" y="1712.5" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">&quot;decision = Approve&quot;</text>
-<rect x="876.3025" y="2388.15" width="107.52000000000001" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
-<text x="930.0625" y="2401.65" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">&quot;enabled = true&quot;</text>
-<rect x="1207.8674999999998" y="2388.15" width="170.44" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
-<text x="1293.0874999999999" y="2401.65" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">&quot;enabled = false (default)&quot;</text>
-<rect x="739.9124999999999" y="32" width="210.75000000000003" height="36" rx="18" ry="18" fill="#e6f3ff" stroke="#0066cc" stroke-width="0.75" />
-<rect x="657.6874999999999" y="248" width="375.20000000000005" height="36" rx="0" ry="0" fill="#fafafa" stroke="#9e9e9e" stroke-width="0.75" />
-<rect x="285.1374999999998" y="1345" width="210.75000000000003" height="36" rx="0" ry="0" fill="#fff8e1" stroke="#f9a825" stroke-width="0.75" />
-<rect x="1679.2124999999996" y="1345" width="189.3" height="36" rx="0" ry="0" fill="#fff8e1" stroke="#f9a825" stroke-width="0.75" />
-<rect x="984.7499999999998" y="1578" width="253.65" height="36" rx="0" ry="0" fill="#fff8e1" stroke="#f9a825" stroke-width="0.75" />
-<polygon points="1111.5749999999998,1810.9999999999998 1357.6499999999999,2057.075 1111.5749999999998,2303.1499999999996 865.4999999999998,2057.075" fill="#fafafa" stroke="#9e9e9e" stroke-width="0.75" />
-<rect x="728.1625" y="2500.15" width="403.8" height="36" rx="0" ry="0" fill="#fafafa" stroke="#9e9e9e" stroke-width="0.75" />
-<rect x="1151.9624999999999" y="2500.15" width="282.25" height="36" rx="0" ry="0" fill="#e8f5e9" stroke="#2e7d32" stroke-width="0.75" />
-<rect x="828.2625" y="2716.15" width="203.60000000000002" height="36" rx="0" ry="0" fill="#e6f3ff" stroke="#0066cc" stroke-width="0.75" />
-<rect x="767.4875" y="2932.15" width="325.15000000000003" height="36" rx="0" ry="0" fill="#e8f5e9" stroke="#2e7d32" stroke-width="0.75" />
-<rect x="621.1374999999999" y="697" width="160.70000000000002" height="36" rx="0" ry="0" fill="#fafafa" stroke="#9e9e9e" stroke-width="0.75" />
-<rect x="528.1875" y="913" width="346.6" height="36" rx="0" ry="0" fill="#f0f7ee" stroke="#3a7d44" stroke-width="0.75" />
-<rect x="560.3625" y="1129" width="282.25" height="36" rx="0" ry="0" fill="#f0f7ee" stroke="#3a7d44" stroke-width="0.75" />
-<rect x="414.5999999999999" y="481" width="282.25" height="36" rx="0" ry="0" fill="#f0f7ee" stroke="#3a7d44" stroke-width="0.75" />
-<rect x="716.85" y="481" width="260.8" height="36" rx="0" ry="0" fill="#f0f7ee" stroke="#3a7d44" stroke-width="0.75" />
-<rect x="997.65" y="481" width="303.70000000000005" height="36" rx="0" ry="0" fill="#f0f7ee" stroke="#3a7d44" stroke-width="0.75" />
-<rect x="1381.35" y="481" width="167.85000000000002" height="36" rx="0" ry="0" fill="#f0f7ee" stroke="#3a7d44" stroke-width="0.75" />
-<rect x="1569.2" y="481" width="196.45000000000002" height="36" rx="0" ry="0" fill="#f0f7ee" stroke="#3a7d44" stroke-width="0.75" />
-<rect x="1785.6499999999999" y="481" width="189.3" height="36" rx="0" ry="0" fill="#f0f7ee" stroke="#3a7d44" stroke-width="0.75" />
-<rect x="1583.5" y="697" width="167.85000000000002" height="36" rx="0" ry="0" fill="#f0f7ee" stroke="#3a7d44" stroke-width="0.75" />
-<rect x="1576.35" y="913" width="182.15" height="36" rx="0" ry="0" fill="#f0f7ee" stroke="#3a7d44" stroke-width="0.75" />
-<rect x="1572.7749999999999" y="1129" width="189.3" height="36" rx="0" ry="0" fill="#fafafa" stroke="#9e9e9e" stroke-width="0.75" />
-<text x="845.2874999999999" y="50" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#003d7a">Azure Monitor\nCost Alert</text>
-<text x="845.2874999999999" y="266" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#212121">&quot;POST /api/webhooks/alert\nAlertWebhookFunction&quot;</text>
-<text x="390.5124999999998" y="1363" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#5d4037">&quot;Slack\nIncoming Webhook&quot;</text>
-<text x="1773.8624999999997" y="1363" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#5d4037">&quot;Discord\nBot Message&quot;</text>
-<text x="1111.5749999999998" y="1596" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#5d4037">&quot;ApprovalRecord\nInMemoryState&quot;</text>
-<text x="1111.5749999999998" y="2057.075" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#212121">&quot;Remediation Gate\nSPIKEHOUND_ENABLE_\nREMEDIATION_EXECUTION&quot;</text>
-<text x="930.0625" y="2518.15" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#212121">&quot;RemediationExecutionOrchestrator\nDurable Function&quot;</text>
-<text x="1293.0874999999999" y="2518.15" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b5e20">&quot;Execution Skipped\nsafety default&quot;</text>
-<text x="930.0625" y="2734.15" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#003d7a">&quot;Azure Compute\nstop_vm&quot;</text>
-<text x="930.0625" y="2950.15" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b5e20">&quot;Follow-up Notification\nSlack + Discord&quot;</text>
-<text x="701.4875" y="715" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#212121">&quot;Unified Findings&quot;</text>
-<text x="701.4875" y="931" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b4332">&quot;Diagnosis Agent\nAzure AI Foundry / GPT-4o&quot;</text>
-<text x="701.4875" y="1147" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b4332">&quot;Remediation Agent\nAction Planner&quot;</text>
-<text x="555.7249999999999" y="499" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b4332">&quot;Cost Analyst\nCost Management API&quot;</text>
-<text x="847.25" y="499" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b4332">&quot;Resource Agent\nResource Graph&quot;</text>
-<text x="1149.5" y="499" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b4332">&quot;History Agent\nAI Search / Cosmos DB&quot;</text>
-<text x="1465.2749999999999" y="499" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b4332">&quot;CostAgentActivity&quot;</text>
-<text x="1667.425" y="499" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b4332">&quot;ResourceAgentActivity&quot;</text>
-<text x="1880.3" y="499" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b4332">&quot;HistoryAgentActivity&quot;</text>
-<text x="1667.425" y="715" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b4332">&quot;DiagnosisActivity&quot;</text>
-<text x="1667.425" y="931" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b4332">&quot;RemediationActivity&quot;</text>
-<text x="1667.425" y="1147" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#212121">&quot;NotificationActivity&quot;</text>
+<polyline points="261.3,68 261.3,88 98.05000000000001,88 98.05000000000001,108" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="261.3,68 261.3,108" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="261.3,68 261.3,88 428.125,88 428.125,108" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="98.05000000000001,144 98.05000000000001,202 109.44999999999999,202" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="261.3,144 261.3,184" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="428.125,144 428.125,202 413.15000000000003,202" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="261.3,220 261.3,248.5 195.82000000000002,248.5 195.82000000000002,277" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="261.3,220 261.3,248.5 326.78000000000003,248.5 326.78000000000003,277" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="195.82000000000002,313 195.82000000000002,396.4651619856717 234.83483801432828,396.4651619856717" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="326.78000000000003,313 326.78000000000003,396.4651619856717 287.76516198567174,396.4651619856717" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="226.5952525003087,462.79525250030866 226.5952525003087,526 151.075,526 151.075,554.5" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="296.5086872118418,462.2913127881582 296.5086872118418,526 375.1,526 375.1,554.5" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<rect x="136.34000000000003" y="235" width="118.96000000000001" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
+<text x="195.82000000000002" y="248.5" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">&quot;Remediation Plan&quot;</text>
+<rect x="267.3" y="235" width="118.96000000000001" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
+<text x="326.78000000000003" y="248.5" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">&quot;Remediation Plan&quot;</text>
+<rect x="142.06" y="328" width="107.52000000000001" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
+<text x="195.82000000000002" y="341.5" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">&quot;Human decision&quot;</text>
+<rect x="273.02000000000004" y="328" width="107.52000000000001" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
+<text x="326.78000000000003" y="341.5" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">&quot;Human decision&quot;</text>
+<rect x="88.73499999999999" y="512.5" width="124.68" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
+<text x="151.075" y="526" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">&quot;Approve + enabled&quot;</text>
+<rect x="312.76" y="512.5" width="124.68" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
+<text x="375.1" y="526" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">&quot;Reject / disabled&quot;</text>
+<rect x="155.925" y="32" width="210.75000000000003" height="36" rx="18" ry="18" fill="#e6f3ff" stroke="#0066cc" stroke-width="0.75" />
+<rect x="32" y="108" width="132.10000000000002" height="36" rx="0" ry="0" fill="#f0f7ee" stroke="#3a7d44" stroke-width="0.75" />
+<rect x="188.10000000000002" y="108" width="146.4" height="36" rx="0" ry="0" fill="#f0f7ee" stroke="#3a7d44" stroke-width="0.75" />
+<rect x="358.5" y="108" width="139.25" height="36" rx="0" ry="0" fill="#f0f7ee" stroke="#3a7d44" stroke-width="0.75" />
+<rect x="109.44999999999999" y="184" width="303.70000000000005" height="36" rx="0" ry="0" fill="#f0f7ee" stroke="#3a7d44" stroke-width="0.75" />
+<rect x="154.79500000000002" y="277" width="82.05000000000001" height="36" rx="0" ry="0" fill="#fff8e1" stroke="#f9a825" stroke-width="0.75" />
+<rect x="278.605" y="277" width="96.35000000000001" height="36" rx="0" ry="0" fill="#fff8e1" stroke="#f9a825" stroke-width="0.75" />
+<polygon points="261.3,370 325.05,433.75 261.3,497.5 197.55,433.75" fill="#fafafa" stroke="#9e9e9e" stroke-width="0.75" />
+<rect x="49.27499999999998" y="554.5" width="203.60000000000002" height="36" rx="0" ry="0" fill="#e6f3ff" stroke="#0066cc" stroke-width="0.75" />
+<rect x="276.875" y="554.5" width="196.45000000000002" height="36" rx="0" ry="0" fill="#e8f5e9" stroke="#2e7d32" stroke-width="0.75" />
+<text x="261.3" y="50" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#003d7a">Azure Monitor\nCost Alert</text>
+<text x="98.05000000000001" y="126" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b4332">&quot;Cost Analyst&quot;</text>
+<text x="261.3" y="126" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b4332">&quot;Resource Agent&quot;</text>
+<text x="428.125" y="126" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b4332">&quot;History Agent&quot;</text>
+<text x="261.3" y="202" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b4332">&quot;Diagnosis Agent\nAI Foundry / GPT-4o&quot;</text>
+<text x="195.82000000000002" y="295" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#5d4037">&quot;Slack&quot;</text>
+<text x="326.78000000000003" y="295" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#5d4037">&quot;Discord&quot;</text>
+<text x="261.3" y="433.75" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#212121">&quot;Approve?&quot;</text>
+<text x="151.075" y="572.5" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#003d7a">&quot;Azure Compute\nstop_vm&quot;</text>
+<text x="375.1" y="572.5" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="#1b5e20">&quot;Skipped\nsafe default&quot;</text>
 </svg>
