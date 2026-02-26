@@ -1,6 +1,9 @@
-# Planning docs are tracked (do not ignore `.planning/`)
+# ── Internal / removed ────────────────────────────────────────────────────────
 
-# ── Python ──────────────────────────────────────────────────────────────────
+.planning/
+demo-alert-payload.json
+
+# ── Python (legacy stack — kept for local dev hygiene) ───────────────────────
 
 # Bytecode / caches
 __pycache__/
@@ -78,11 +81,9 @@ test-results/
 playwright-report/
 TestResults/
 
-# ── Demo artifacts (personal, not public-facing) ─────────────────────────────
+# ── Demo artifacts ────────────────────────────────────────────────────────────
 
-demo/voiceover.md
-demo/SEEDANCE.md
-demo/VEO.md
+demo/
 
 # ── Logs ──────────────────────────────────────────────────────────────────────
 

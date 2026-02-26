@@ -142,10 +142,6 @@ spikehound/
 │   │   └── Spikehound.Functions/     # Azure Functions host (HTTP triggers, Durable)
 │   └── tests/
 │       └── Spikehound.Core.Tests/    # xUnit unit tests
-├── demo/
-│   ├── scenario.md                   # Staged GPU-VM cost anomaly walkthrough
-│   ├── stage_anomaly.sh              # Bootstrap demo infra
-│   └── cleanup_demo.sh               # Tear down demo infra
 ├── docs/
 │   ├── architecture.mmd              # Mermaid source
 │   ├── architecture-light.svg        # Rendered diagram (light mode)
@@ -153,10 +149,6 @@ spikehound/
 │   └── render_architecture.sh        # Diagram render script
 ├── infra/
 │   └── foundry_config.yaml           # Azure AI Foundry project config
-├── scripts/
-│   ├── dev.sh                        # Local dev helper
-│   ├── cost_management_smoke.py      # Cost Management API smoke test
-│   └── foundry_smoke.py              # Foundry connectivity smoke test
 ├── .env.example                      # Environment variable template
 └── .github/workflows/ci-cd.yml       # GitHub Actions CI/CD
 ```
@@ -317,13 +309,6 @@ SPIKEHOUND_USE_DURABLE=true func start
 
 Set `SPIKEHOUND_CLOUD_ENABLED=true` in `.env` along with the Azure credential variables. All agents check this gate before making Azure API calls; with it off they return deterministic fallback results.
 
-**Optional smoke tests** (require Azure credentials):
-
-```bash
-python3 scripts/cost_management_smoke.py
-python3 scripts/foundry_smoke.py
-```
-
 ---
 
 ## Testing
@@ -340,8 +325,6 @@ The test suite covers:
 - **Edge cases** — invalid JSON → `400`, unsigned Slack/Discord callbacks → `401`
 - **Durable mode** — scheduling response `202` with `instanceId`
 
-For a full interactive validation walkthrough (including Slack and Discord callback testing), see [`demo/scenario.md`](demo/scenario.md).
-
 ---
 
 ## CI/CD
@@ -357,18 +340,6 @@ GitHub Actions workflow: [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd
 **To enable Azure deployment**, add to your repository:
 - Repository variable: `SPIKEHOUND_FUNCTIONAPP_NAME`
 - Repository secret: `SPIKEHOUND_FUNCTIONAPP_PUBLISH_PROFILE`
-
----
-
-## Demo Scenario
-
-The reference scenario simulates a GPU VM left running for 72 hours after a training job completed, causing cost to spike from $12.50/day to $450/day (36× anomaly factor).
-
-See [`demo/scenario.md`](demo/scenario.md) for the complete walkthrough, including:
-- How to trigger the investigation with a `curl` command
-- Expected per-agent outputs
-- The Slack/Discord approval flow
-- How to stage and clean up real Azure demo infrastructure
 
 ---
 
