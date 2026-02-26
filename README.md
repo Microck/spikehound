@@ -270,7 +270,7 @@ Supported interaction types: `approve_remediation`, `reject_remediation`, `inves
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/architecture-dark.svg">
-  <img alt="Spikehound Architecture" src="docs/architecture-light.svg" width="700">
+  <img alt="Spikehound Architecture" src="docs/architecture-light.svg" width="820">
 </picture>
 
 **Agents and their roles:**
