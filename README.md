@@ -143,10 +143,7 @@ spikehound/
 │   └── tests/
 │       └── Spikehound.Core.Tests/    # xUnit unit tests
 ├── docs/
-│   ├── architecture.mmd              # Mermaid source
-│   ├── architecture-light.svg        # Rendered diagram (light mode)
-│   ├── architecture-dark.svg         # Rendered diagram (dark mode)
-│   └── render_architecture.sh        # Diagram render script
+│   └── brand/                         # Logo assets
 ├── infra/
 │   └── foundry_config.yaml           # Azure AI Foundry project config
 ├── .env.example                      # Environment variable template
@@ -258,10 +255,63 @@ Supported interaction types: `approve_remediation`, `reject_remediation`, `inves
 
 ## Architecture
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/architecture-dark.svg">
-  <img alt="Spikehound Architecture" src="docs/architecture-light.svg" width="820">
-</picture>
+```mermaid
+flowchart TD
+    AM([Azure Monitor\nCost Alert])
+    AW["Webhook\n/api/webhooks/alert"]
+
+    AM --> AW
+
+    CA["Cost Analyst\nCost Management API"]
+    RA["Resource Agent\nResource Graph"]
+    HA["History Agent\nAI Search / Cosmos DB"]
+
+    AW --> CA & RA & HA
+
+    CF["Unified Findings"]
+
+    CA & RA & HA --> CF
+
+    DA["Diagnosis Agent\nAI Foundry / GPT-4o"]
+    CF --> DA
+
+    RP["Remediation Planner"]
+    DA --> RP
+
+    SN["Slack"]
+    DN["Discord"]
+
+    RP --> SN & DN
+
+    AREC["Approval Record"]
+    SN & DN -->|"Approve / Reject / Investigate"| AREC
+
+    GATE{"Remediation Gate"}
+    AREC -->|"Approve"| GATE
+
+    REO["Remediation Orchestrator"]
+    SAFE["Skipped — safe default"]
+
+    GATE -->|"enabled"| REO
+    GATE -->|"disabled"| SAFE
+
+    AZ["Azure Compute\nstop_vm"]
+    FU["Follow-up Notification"]
+
+    REO --> AZ --> FU
+
+    classDef azure   fill:#e6f3ff,stroke:#0066cc,color:#003d7a
+    classDef agent   fill:#f0f7ee,stroke:#3a7d44,color:#1b4332
+    classDef human   fill:#fff8e1,stroke:#f9a825,color:#5d4037
+    classDef safe    fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef neutral fill:#fafafa,stroke:#9e9e9e,color:#212121
+
+    class AM,AZ azure
+    class CA,RA,HA,DA,RP agent
+    class SN,DN,AREC human
+    class SAFE,FU safe
+    class CF,REO,GATE,AW neutral
+```
 
 **Agents and their roles:**
 
@@ -276,7 +326,7 @@ Supported interaction types: `approve_remediation`, `reject_remediation`, `inves
 
 All three investigator agents run in parallel. The coordinator waits for all three before passing unified findings to the Diagnosis Agent.
 
-Diagram source: [`docs/architecture.mmd`](docs/architecture.mmd) — re-render with `bash docs/render_architecture.sh`.
+
 
 ---
 
