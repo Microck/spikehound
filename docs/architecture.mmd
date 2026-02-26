@@ -1,90 +1,87 @@
-graph TB
-    subgraph "Azure Cloud"
-        A[Azure Monitor<br/>Cost Alert]
-    end
+flowchart TB
+    AM([Azure Monitor\nCost Alert])
 
-    subgraph "Spikehound"
+    AW["POST /api/webhooks/alert\nAlertWebhookFunction"]
+
+    AM --> AW
+
+    AW -->|"SPIKEHOUND_USE_DURABLE=false&#10;200 OK + full report"| INLINE
+    AW -->|"SPIKEHOUND_USE_DURABLE=true&#10;202 Accepted + instanceId"| DURABLE
+
+    subgraph INLINE ["Inline — CoordinatorPipeline"]
         direction TB
-        C[Coordinator<br/>Webhook<br/>/webhooks/alert]
 
-        subgraph "Parallel Investigation"
+        subgraph PAR ["Parallel Investigation  Task.WhenAll"]
             direction LR
-            CA[Cost Analyst<br/>Cost Management API]
-            RA[Resource Agent<br/>Resource Graph<br/>Activity Logs]
-            HA[History Agent<br/>Azure AI Search<br/>Cosmos DB]
-
-            CA -->|top_cost_driver| CF[Cost Findings]
-            RA -->|config_activity| RF[Resource Findings]
-            HA -->|similar_incidents| HF[History Findings]
+            CA["Cost Analyst\nCost Management API"]
+            RA["Resource Agent\nResource Graph"]
+            HA["History Agent\nAI Search / Cosmos DB"]
         end
 
-        U[Unified Findings<br/>Coordinator Aggregation]
-        CF & RF & HF --> U
+        CF["Unified Findings"]
+        DA["Diagnosis Agent\nAzure AI Foundry / GPT-4o"]
+        RP["Remediation Agent\nAction Planner"]
+
+        CA --> CF
+        RA --> CF
+        HA --> CF
+        CF --> DA
+        DA --> RP
     end
 
-    subgraph "Analysis"
-        D[Diagnosis Agent<br/>Azure AI Foundry]
-        D -->|root_cause| RH[Root Cause<br/>85% Confidence]
-    end
-
-    subgraph "Remediation"
-        R[Remediation Agent<br/>Action Planner]
-        RH --> R
-        R -->|requires_approval| RP[Remediation Plan<br/>human_approval_required=true]
-    end
-
-    subgraph "Human Loop"
+    subgraph DURABLE ["Durable — CoordinatorOrchestrator"]
         direction TB
-        SN[Slack Notification<br/>Incoming Webhook]
-        RP --> SN
+        DCA["CostAgentActivity"]
+        DRA["ResourceAgentActivity"]
+        DHA["HistoryAgentActivity"]
+        DFI["DiagnosisActivity"]
+        DRE["RemediationActivity"]
+        DNA["NotificationActivity"]
 
-        subgraph "Slack Interaction"
-            direction LR
-            BA[Approve Button<br/>primary]
-            BR[Reject Button<br/>danger]
-            BI[Investigate Button<br/>default]
-        end
-
-        SN --> BA
-        SN --> BR
-        SN --> BI
-
-        subgraph "Decision Processing"
-            direction TB
-            AD[Approval Record<br/>in-memory store]
-            BA -->|approve| AD
-            BR -->|reject| AD
-            BI -->|investigate| AD
-        end
+        DCA --> DFI
+        DRA --> DFI
+        DHA --> DFI
+        DFI --> DRE
+        DRE --> DNA
     end
 
-    subgraph "Execution"
-        direction TB
-        AD -->|gate| AE[Remediation Engine<br/>Approval Gate]
-        AE -->|executed| EX[Azure Compute<br/>stop_vm]
+    SN["Slack\nIncoming Webhook"]
+    DN["Discord\nBot Message"]
 
-        subgraph "Azure Resource"
-            VM[GPU VM<br/>spikehound-gpu-vm]
-            EX --> VM
-        end
-    end
-
-    subgraph "Follow-up"
-        direction TB
-        FS[Follow-up Slack<br/>Execution Outcome]
-        EX -->|success| FS
-    end
-
-    %% Flow connections
-    A --> C
-    C --> U
-    U --> D
-    D --> R
     RP --> SN
+    RP --> DN
+    DNA --> SN
+    DNA --> DN
 
-    classDef approved fill:#90EE90,stroke:#333,stroke-width:2px
-    classDef rejected fill:#F44336,stroke:#333,stroke-width:2px
+    AREC["ApprovalRecord\nInMemoryState"]
 
-    style AE stroke:#009688,stroke-width:3px
-    style EX fill:#e6f3ff,stroke:#0066cc
-    style FS fill:#4CAF50,stroke:#2E7D32
+    SN -->|"approve / reject / investigate"| AREC
+    DN -->|"approve / reject / investigate"| AREC
+
+    GATE{"Remediation Gate\nSPIKEHOUND_ENABLE_\nREMEDIATION_EXECUTION"}
+
+    AREC -->|"decision = Approve"| GATE
+
+    REO["RemediationExecutionOrchestrator\nDurable Function"]
+    SAFE["Execution Skipped\nsafety default"]
+
+    GATE -->|"enabled = true"| REO
+    GATE -->|"enabled = false (default)"| SAFE
+
+    AZ["Azure Compute\nstop_vm"]
+    FU["Follow-up Notification\nSlack + Discord"]
+
+    REO --> AZ
+    AZ --> FU
+
+    classDef azure   fill:#e6f3ff,stroke:#0066cc,color:#003d7a
+    classDef agent   fill:#f0f7ee,stroke:#3a7d44,color:#1b4332
+    classDef human   fill:#fff8e1,stroke:#f9a825,color:#5d4037
+    classDef safe    fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef neutral fill:#fafafa,stroke:#9e9e9e,color:#212121
+
+    class AM,AZ azure
+    class CA,RA,HA,DA,RP,DCA,DRA,DHA,DFI,DRE agent
+    class SN,DN,AREC human
+    class SAFE,FU safe
+    class CF,REO,GATE,AW,DNA neutral

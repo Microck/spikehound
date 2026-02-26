@@ -150,7 +150,8 @@ spikehound/
 │   └── cleanup_demo.sh               # Tear down demo infra
 ├── docs/
 │   ├── architecture.mmd              # Mermaid source
-│   └── architecture.png              # Rendered diagram
+│   ├── architecture.svg              # Rendered diagram (SVG)
+│   └── render_architecture.sh        # Diagram render script
 ├── infra/
 │   └── foundry_config.yaml           # Azure AI Foundry project config
 ├── scripts/
@@ -266,7 +267,7 @@ Supported interaction types: `approve_remediation`, `reject_remediation`, `inves
 
 ## Architecture
 
-![Spikehound Architecture](docs/architecture.png)
+![Spikehound Architecture](docs/architecture.svg)
 
 **Agents and their roles:**
 
@@ -281,7 +282,7 @@ Supported interaction types: `approve_remediation`, `reject_remediation`, `inves
 
 All three investigator agents run in parallel. The coordinator waits for all three before passing unified findings to the Diagnosis Agent.
 
-Diagram source: [`docs/architecture.mmd`](docs/architecture.mmd) — render with `bash docs/render_architecture.sh`.
+Diagram source: [`docs/architecture.mmd`](docs/architecture.mmd) — re-render with `bash docs/render_architecture.sh`.
 
 ---
 
