@@ -21,12 +21,12 @@ Use this checklist to produce a consistent, high-quality 2-minute demo video for
   - Test: Slack test message sent (optional, but good for verification)
 
 - [ ] **Webhook mode set for synchronous demo**
-  - Verify: `INCIDENT_WR_USE_DURABLE=false` in `.env`
+  - Verify: `SPIKEHOUND_USE_DURABLE=false` in `.env`
   - Note: `true` schedules Durable orchestration and returns async `202`
 
 - [ ] **Demo VM is staged**
   - Verify: VM is running and tagged with `demo=true`
-  - Run: `bash demo/stage_anomaly.sh --vm-name gpu-training-vm --resource-group ai-dev-days-hackathon-eu`
+  - Run: `bash demo/stage_anomaly.sh --vm-name spikehound-gpu-vm --resource-group spikehound-demo-rg`
   - Check: `demo=true` tag visible in Azure Portal
 
 ### Recording Preparation
@@ -99,7 +99,7 @@ Use this checklist to produce a consistent, high-quality 2-minute demo video for
 - Say: "For this demo, I've staged..." anomaly explanation
 
 **Checklist:**
-- [ ] VM name (gpu-training-vm) is visible
+- [ ] VM name (spikehound-gpu-vm) is visible
 - [ ] Status shows "Running" (or "VM running")
 - [ ] Cost spike numbers are visible ($12 vs $450, 36x factor)
 - [ ] Recording shows VM details panel
@@ -256,7 +256,7 @@ Use this checklist to produce a consistent, high-quality 2-minute demo video for
 
 ```bash
 # Start Functions app (Terminal 1)
-cd dotnet/src/IncidentWarRoom.Functions && func start
+cd dotnet/src/Spikehound.Functions && func start
 
 # Check health
 curl http://localhost:7071/api/health
@@ -267,10 +267,10 @@ curl -X POST http://localhost:7071/api/webhooks/alert \
   -d @demo-alert-payload.json
 
 # Stage anomaly (before demo)
-bash demo/stage_anomaly.sh --vm-name gpu-training-vm --resource-group ai-dev-days-hackathon-eu
+bash demo/stage_anomaly.sh --vm-name spikehound-gpu-vm --resource-group spikehound-demo-rg
 
 # Clean up after demo
-bash demo/cleanup_demo.sh --vm-name gpu-training-vm --resource-group ai-dev-days-hackathon-eu
+bash demo/cleanup_demo.sh --vm-name spikehound-gpu-vm --resource-group spikehound-demo-rg
 ```
 
 ---

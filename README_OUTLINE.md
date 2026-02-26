@@ -1,14 +1,14 @@
 # README Outline (Top-Repo Pattern)
 
-Generated from `projects/incident-war-room` with apply mode ON (README.md modified via a single marker block).
+Generated from `projects/spikehound` with apply mode ON (README.md modified via a single marker block).
 
 ## Project signals (detected)
 
 - README: `README.md`
 - License: `LICENSE` (Apache-2.0)
 - Primary runtime: .NET 8 Azure Functions (isolated worker)
-  - Solution: `dotnet/IncidentWarRoom.sln`
-  - Function app: `dotnet/src/IncidentWarRoom.Functions/IncidentWarRoom.Functions.csproj`
+  - Solution: `dotnet/Spikehound.sln`
+  - Function app: `dotnet/src/Spikehound.Functions/Spikehound.Functions.csproj`
 - API style: HTTP-triggered Functions (webhooks + health)
 - Docs/diagrams: `docs/architecture.mmd`, `docs/architecture.png`
 - Demo assets: `demo/scenario.md`, `demo/*.sh`
@@ -112,7 +112,7 @@ set -a; source .env; set +a
 
 cd dotnet
 dotnet test
-cd src/IncidentWarRoom.Functions
+cd src/Spikehound.Functions
 func start
 ```
 
@@ -142,7 +142,7 @@ TODO: Add one end-to-end example request/response (redact secrets).
 Copy `.env.example` to `.env` and set what you need.
 
 Key toggles:
-- `INCIDENT_WR_USE_DURABLE=false` (inline) / `true` (durable scheduling)
+- `SPIKEHOUND_USE_DURABLE=false` (inline) / `true` (durable scheduling)
 
 Integrations (optional):
 - Azure credentials (`AZURE_*`)
@@ -163,7 +163,7 @@ Base URL (local): `http://localhost:7071`
 
 Behavior notes:
 - Inline mode: returns `200` with investigation report payload
-- Durable mode (`INCIDENT_WR_USE_DURABLE=true`): returns `202` after scheduling orchestration
+- Durable mode (`SPIKEHOUND_USE_DURABLE=true`): returns `202` after scheduling orchestration
 
 TODO: Add example payloads + response schema (or link to a spec file).
 

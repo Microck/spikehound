@@ -16,14 +16,18 @@ It ingests an alert payload, fans out to specialized investigators (cost, resour
 Prereqs:
 - .NET 8 SDK
 - Azure Functions Core Tools v4 (`func`)
+- Azurite (`azurite`) for local `AzureWebJobsStorage=UseDevelopmentStorage=true`
 
 ```bash
 cp .env.example .env
 set -a; source .env; set +a
 
+mkdir -p /tmp/azurite
+azurite --silent --location /tmp/azurite --debug /tmp/azurite/debug.log
+
 cd dotnet
 dotnet test
-cd src/IncidentWarRoom.Functions
+cd src/Spikehound.Functions
 func start
 ```
 
@@ -34,10 +38,14 @@ curl -sS http://localhost:7071/api/health
 ## Installation
 
 Repo layout:
-- Solution: `dotnet/IncidentWarRoom.sln`
-- Function app: `dotnet/src/IncidentWarRoom.Functions/IncidentWarRoom.Functions.csproj`
+- Solution: `dotnet/Spikehound.sln`
+- Function app: `dotnet/src/Spikehound.Functions/Spikehound.Functions.csproj`
 
-TODO: document any optional prerequisites (Slack/Discord interactive callbacks, ngrok).
+Optional integration prerequisites:
+- ngrok (or equivalent tunnel) for Slack/Discord callback endpoints in local development
+- Slack app with Incoming Webhook + Interactivity enabled
+- Discord application with Interactions Endpoint URL configured
+- Discord bot token + channel id (recommended for interactive Discord buttons)
 
 ## Usage
 
@@ -60,9 +68,15 @@ set -a; source .env; set +a
 ```
 
 Key toggles:
-- `INCIDENT_WR_USE_DURABLE=false` (inline) / `true` (durable scheduling)
+- `SPIKEHOUND_USE_DURABLE=false` (inline) / `true` (durable scheduling)
+- `SPIKEHOUND_ENABLE_REMEDIATION_EXECUTION=false` (safe default) / `true` (execute approved remediation actions)
 
-TODO: document which env vars are required for each mode.
+When execution is disabled, approvals are still recorded and queued through Durable orchestration, but outcomes are marked as skipped by configuration.
+
+Interactive callback configuration:
+- Slack callbacks: set `SLACK_SIGNING_SECRET` and configure Slack Interactivity Request URL to `/api/webhooks/slack/actions`
+- Discord callbacks: set `DISCORD_INTERACTIONS_PUBLIC_KEY` and configure Discord Interactions Endpoint URL to `/api/webhooks/discord/interactions`
+- For reliable Discord interactive buttons, configure `DISCORD_BOT_TOKEN` + `DISCORD_CHANNEL_ID` (webhook-only Discord mode sends plain notifications and may not deliver interactive button callbacks)
 
 ## API Reference
 
@@ -76,6 +90,10 @@ Local base URL (default): `http://localhost:7071`
 Behavior notes:
 - Inline mode: returns `200` with an investigation report payload
 - Durable mode: returns `202` after scheduling orchestration
+- Approved Slack/Discord decisions schedule `RemediationExecutionOrchestrator` for remediation execution
+- Duplicate approve decisions for the same investigation are deduplicated (no second orchestration instance)
+- Slack notifications include interactive Approve/Reject/Investigate buttons
+- Discord notifications include interactive buttons when bot mode is configured (`DISCORD_BOT_TOKEN` + `DISCORD_CHANNEL_ID`)
 
 ## Architecture
 
@@ -99,6 +117,23 @@ TODO: add formatting/linting and debugging notes.
 cd dotnet
 dotnet test
 ```
+
+## CI/CD
+
+GitHub Actions workflow: `.github/workflows/ci-cd.yml`
+
+- `Build And Unit Tests`: builds `dotnet/Spikehound.sln` and runs tests.
+- `Local E2E And Edge Cases`: boots Azurite + Functions host and verifies:
+  - inline mode success path and idempotent duplicate path
+  - invalid JSON (`400`)
+  - unsigned Slack/Discord callbacks (`401`)
+  - durable mode scheduling response (`202` with `instanceId`)
+- `Deploy Azure Function App`: runs on pushes to `main` only when deployment settings are configured.
+
+To enable deployment, configure these repository settings:
+
+- Repository variable: `SPIKEHOUND_FUNCTIONAPP_NAME`
+- Repository secret: `SPIKEHOUND_FUNCTIONAPP_PUBLISH_PROFILE`
 
 ## Contributing
 

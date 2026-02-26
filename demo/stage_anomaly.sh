@@ -3,7 +3,7 @@
 # demo/stage_anomaly.sh
 #
 # Stages a GPU VM cost anomaly for demo purposes.
-# Usage: bash demo/stage_anomaly.sh --vm-name <name> --resource-group <name>
+# Usage: bash demo/stage_anomaly.sh [--vm-name <name>] [--resource-group <name>]
 #
 # This script ensures the demo VM is running and tags it for identification.
 # It does NOT create expensive resources; it works with existing VMs.
@@ -11,7 +11,8 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: bash demo/stage_anomaly.sh --vm-name <name> --resource-group <name>"
+  echo "Usage: bash demo/stage_anomaly.sh [--vm-name <name>] [--resource-group <name>]"
+  echo "Defaults: --vm-name spikehound-gpu-vm --resource-group spikehound-demo-rg"
 }
 
 run() {
@@ -19,8 +20,8 @@ run() {
   "$@"
 }
 
-VM_NAME=""
-RESOURCE_GROUP=""
+VM_NAME="spikehound-gpu-vm"
+RESOURCE_GROUP="spikehound-demo-rg"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -44,13 +45,6 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
-
-# Validate required arguments
-if [[ -z "$VM_NAME" || -z "$RESOURCE_GROUP" ]]; then
-  echo "Error: Missing required arguments"
-  usage
-  exit 1
-fi
 
 echo "=========================================="
 echo "Spikehound Demo: Staging Anomaly"
@@ -122,11 +116,11 @@ DEMO_DATE=$(date -u +%Y-%m-%d)
 run az vm update \
   --name "$VM_NAME" \
   --resource-group "$RESOURCE_GROUP" \
-  --set tags.demo=true \
+  --set tags.demo=enabled \
   --set tags.demo_scenario=gpu-vm-cost-spike \
   --set tags.demo_date="$DEMO_DATE"
 
-echo "✓ Tags added: demo=true, demo_scenario=gpu-vm-cost-spike"
+echo "✓ Tags added: demo=enabled, demo_scenario=gpu-vm-cost-spike"
 echo ""
 
 # Show VM details for confirmation
@@ -148,7 +142,7 @@ echo "The VM is now tagged and running."
 echo "The demo scenario is ready to trigger via webhook."
 echo ""
 echo "To trigger the demo alert, run:"
-echo "  curl -X POST http://localhost:8000/webhooks/alert -H 'Content-Type: application/json' -d @demo-alert-payload.json"
+echo "  curl -X POST http://localhost:7071/api/webhooks/alert -H 'Content-Type: application/json' -d @demo-alert-payload.json"
 echo ""
 echo "To clean up after the demo, run:"
 echo "  bash demo/cleanup_demo.sh --vm-name $VM_NAME --resource-group $RESOURCE_GROUP"

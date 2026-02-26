@@ -7,10 +7,11 @@ This script provides a precise, timecoded demo for the hackathon presentation. T
 ### Prerequisites
 
 1. **Azure CLI is authenticated:** `az account show` confirms access
-2. **Spikehound Functions app is running:** `cd dotnet/src/IncidentWarRoom.Functions && func start`
+2. **Spikehound Functions app is running:** `cd dotnet/src/Spikehound.Functions && func start`
 3. **Slack app is configured:** `.env` has `SLACK_WEBHOOK_URL` and `SLACK_SIGNING_SECRET`
-4. **Demo VM is staged:** Run `bash demo/stage_anomaly.sh --vm-name <vm> --resource-group <rg>` first
-5. **Inline mode for live narration:** set `INCIDENT_WR_USE_DURABLE=false` (durable mode returns async `202` scheduling response)
+4. **Discord app is configured (optional for demo):** `.env` has `DISCORD_INTERACTIONS_PUBLIC_KEY`; for interactive Discord buttons, set `DISCORD_BOT_TOKEN` + `DISCORD_CHANNEL_ID`
+5. **Demo VM is staged:** Run `bash demo/stage_anomaly.sh --vm-name <vm> --resource-group <rg>` first
+6. **Inline mode for live narration:** set `SPIKEHOUND_USE_DURABLE=false` (durable mode returns async `202` scheduling response)
 
 ### Before Recording
 
@@ -65,14 +66,14 @@ curl -X POST http://localhost:7071/api/webhooks/alert \
 
 **Server terminal (Terminal 1) shows:**
 ```
-INFO:incident-war-room:webhook_received
-INFO:incident-war-room:running_coordinator_fanout
-INFO:incident-war-room:cost_analyst_completed
-INFO:incident-war-room:resource_agent_completed
-INFO:incident-war-room:history_agent_completed
-INFO:incident-war-room:diagnosis_completed
-INFO:incident-war-room:remediation_completed
-INFO:incident-war-room:slack_webhook_sent
+INFO:spikehound:webhook_received
+INFO:spikehound:running_coordinator_fanout
+INFO:spikehound:cost_analyst_completed
+INFO:spikehound:resource_agent_completed
+INFO:spikehound:history_agent_completed
+INFO:spikehound:diagnosis_completed
+INFO:spikehound:remediation_completed
+INFO:spikehound:slack_webhook_sent
 ```
 
 **Say:**
@@ -80,7 +81,7 @@ INFO:incident-war-room:slack_webhook_sent
 
 ### 1:00 - 1:20 | Multi-Agent Outputs (20 seconds)
 
-**Show:** Slack channel (refresh or open in new tab)
+**Show:** Slack channel (or Discord channel if demoing Discord)
 - Point to each section of the Slack message
 
 **Slack message appears with:**
@@ -88,10 +89,10 @@ INFO:incident-war-room:slack_webhook_sent
 Incident Investigation Complete
 
 Alert: demo-gpu-spike-001
-Top cost driver(s): gpu-training-vm ($450.00/day)
+Top cost driver(s): spikehound-gpu-vm ($450.00/day)
 Confidence: 85%
 Root cause: GPU VM left running after training job completed 72 hours ago
-First remediation action: stop_vm on gpu-training-vm
+First remediation action: stop_vm on spikehound-gpu-vm
 
 [Approve] [Reject] [Investigate More]
 ```
@@ -101,24 +102,24 @@ First remediation action: stop_vm on gpu-training-vm
 
 ### 1:20 - 1:40 | Human Approval (20 seconds)
 
-**Action:** Click the "Approve" button in Slack
+**Action:** Click the "Approve" button in Slack (or Discord)
 
 **Show:** Terminal 1 — watch for logs
 - New log lines appear as Slack callback is received and processed
 
 **Terminal 1 shows:**
 ```
-INFO:incident-war-room:slack_approval_received
-INFO:incident-war-room:slack_approval_recorded
-INFO:incident-war-room:remediation_execution_queued
-INFO:incident-war-room:remediation_execution_started
-INFO:incident-war-room:azure_vm_stop_attempt
-INFO:incident-war-room:remediation_completed
-INFO:incident-war-room:slack_follow_up_sent
+INFO:spikehound:slack_approval_received
+INFO:spikehound:slack_approval_recorded
+INFO:spikehound:remediation_execution_queued
+INFO:spikehound:remediation_execution_started
+INFO:spikehound:azure_vm_stop_attempt
+INFO:spikehound:remediation_completed
+INFO:spikehound:slack_follow_up_sent
 ```
 
 **Say:**
-> "To execute any remediation action, a human must explicitly approve it via Slack. I'm clicking the Approve button now. This is a critical safety feature — no actions execute without human approval."
+> "To execute any remediation action, a human must explicitly approve it. I'm clicking the Approve button now. This is a critical safety feature — no actions execute without human approval."
 
 ### 1:40 - 2:00 | Remediation Execution (20 seconds)
 
@@ -130,7 +131,7 @@ INFO:incident-war-room:slack_follow_up_sent
 ```
 ✅ Remediation completed
 Action: stop_vm
-Target: gpu-training-vm
+Target: spikehound-gpu-vm
 Outcome: SUCCESS - VM stopped and deallocated
 Estimated Savings: $450/day ongoing
 ```
@@ -156,13 +157,13 @@ Save this as `demo-alert-payload.json` for easy triggering:
       "monitorCondition": "Fired",
       "monitoringService": "Cost Management",
       "alertTargetIDs": [
-        "/subscriptions/<your-subscription-id>/resourceGroups/ai-dev-days-hackathon-eu/providers/Microsoft.Compute/virtualMachines/gpu-training-vm"
+        "/subscriptions/<your-subscription-id>/resourceGroups/spikehound-demo-rg/providers/Microsoft.Compute/virtualMachines/spikehound-gpu-vm"
       ],
       "firedDateTime": "2026-02-11T10:00:00Z",
       "description": "Unexpected GPU VM running for 72 hours with $450 daily spend"
     },
     "alertContext": {
-      "ResourceId": "/subscriptions/<your-subscription-id>/resourceGroups/ai-dev-days-hackathon-eu/providers/Microsoft.Compute/virtualMachines/gpu-training-vm",
+      "ResourceId": "/subscriptions/<your-subscription-id>/resourceGroups/spikehound-demo-rg/providers/Microsoft.Compute/virtualMachines/spikehound-gpu-vm",
       "costAnomaly": {
         "expectedDailyCost": 12.50,
         "actualDailyCost": 450.00,

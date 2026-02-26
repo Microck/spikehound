@@ -19,16 +19,16 @@ tech-stack:
 
 key-files:
   created:
-    - dotnet/IncidentWarRoom.sln
-    - dotnet/src/IncidentWarRoom.Core/Parsing/AlertNormalizer.cs
-    - dotnet/src/IncidentWarRoom.Core/Security/SlackSignatureVerifier.cs
-    - dotnet/src/IncidentWarRoom.Core/Security/DiscordSignatureVerifier.cs
-    - dotnet/src/IncidentWarRoom.Core/Orchestration/CoordinatorPipeline.cs
-    - dotnet/src/IncidentWarRoom.Functions/Functions/AlertWebhookFunction.cs
-    - dotnet/src/IncidentWarRoom.Functions/Functions/SlackActionsFunction.cs
-    - dotnet/src/IncidentWarRoom.Functions/Functions/DiscordInteractionsFunction.cs
+    - dotnet/Spikehound.sln
+    - dotnet/src/Spikehound.Core/Parsing/AlertNormalizer.cs
+    - dotnet/src/Spikehound.Core/Security/SlackSignatureVerifier.cs
+    - dotnet/src/Spikehound.Core/Security/DiscordSignatureVerifier.cs
+    - dotnet/src/Spikehound.Core/Orchestration/CoordinatorPipeline.cs
+    - dotnet/src/Spikehound.Functions/Functions/AlertWebhookFunction.cs
+    - dotnet/src/Spikehound.Functions/Functions/SlackActionsFunction.cs
+    - dotnet/src/Spikehound.Functions/Functions/DiscordInteractionsFunction.cs
   modified:
-    - dotnet/src/IncidentWarRoom.Functions/Program.cs
+    - dotnet/src/Spikehound.Functions/Program.cs
     - README.md
     - .gitignore
 
@@ -72,14 +72,14 @@ completed: 2026-02-15
 
 ## Files Created/Modified
 
-- `dotnet/IncidentWarRoom.sln` - Solution container for core/functions/tests.
-- `dotnet/src/IncidentWarRoom.Core/Parsing/AlertNormalizer.cs` - Alert normalization ported from FastAPI demo.
-- `dotnet/src/IncidentWarRoom.Core/Security/SlackSignatureVerifier.cs` - Slack signature verification logic.
-- `dotnet/src/IncidentWarRoom.Core/Security/DiscordSignatureVerifier.cs` - Discord Ed25519 verification logic.
-- `dotnet/src/IncidentWarRoom.Core/Orchestration/CoordinatorPipeline.cs` - Coordinator composition logic (fan-out/fan-in) with best-effort notification hook.
-- `dotnet/src/IncidentWarRoom.Functions/Functions/AlertWebhookFunction.cs` - `POST /api/webhooks/alert` endpoint.
-- `dotnet/src/IncidentWarRoom.Functions/Functions/SlackActionsFunction.cs` - `POST /api/webhooks/slack/actions` endpoint.
-- `dotnet/src/IncidentWarRoom.Functions/Functions/DiscordInteractionsFunction.cs` - `POST /api/webhooks/discord/interactions` endpoint.
+- `dotnet/Spikehound.sln` - Solution container for core/functions/tests.
+- `dotnet/src/Spikehound.Core/Parsing/AlertNormalizer.cs` - Alert normalization ported from FastAPI demo.
+- `dotnet/src/Spikehound.Core/Security/SlackSignatureVerifier.cs` - Slack signature verification logic.
+- `dotnet/src/Spikehound.Core/Security/DiscordSignatureVerifier.cs` - Discord Ed25519 verification logic.
+- `dotnet/src/Spikehound.Core/Orchestration/CoordinatorPipeline.cs` - Coordinator composition logic (fan-out/fan-in) with best-effort notification hook.
+- `dotnet/src/Spikehound.Functions/Functions/AlertWebhookFunction.cs` - `POST /api/webhooks/alert` endpoint.
+- `dotnet/src/Spikehound.Functions/Functions/SlackActionsFunction.cs` - `POST /api/webhooks/slack/actions` endpoint.
+- `dotnet/src/Spikehound.Functions/Functions/DiscordInteractionsFunction.cs` - `POST /api/webhooks/discord/interactions` endpoint.
 - `README.md` - Dotnet-first quick start and updated tech stack.
 
 ## Decisions Made
@@ -94,7 +94,7 @@ completed: 2026-02-15
 **1. [Rule 3 - Blocking] Plan file initially created in the wrong workspace directory**
 - **Found during:** Task 0 (plan setup)
 - **Issue:** `.planning/phases/06-perfect-stack-migration/06-01-PLAN.md` was added at workspace root instead of repo.
-- **Fix:** Moved the plan file into `projects/incident-war-room/.planning/...`.
+- **Fix:** Moved the plan file into `projects/spikehound/.planning/...`.
 - **Verification:** `grep`/`ls` confirmed the plan exists under the repo.
 
 **2. [Rule 2 - Critical] Remove accidentally committed .NET build artifacts**

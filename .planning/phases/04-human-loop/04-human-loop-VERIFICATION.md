@@ -99,7 +99,7 @@ human_verification:
 
 **Test:** Approve callback triggered background remediation execution path.
 **Result:** Server logs confirm `slack_approval_recorded` followed by `remediation_execution_skipped` (expected in this run: no matching remediation plan in memory for this investigation ID). Approval gating and execution wiring is verified; Azure side effects were not confirmed here.
-**Evidence:** Log: `INFO:incident-war-room:slack_approval_recorded` + `WARNING:incident-war-room:remediation_execution_skipped`
+**Evidence:** Log: `INFO:spikehound:slack_approval_recorded` + `WARNING:spikehound:remediation_execution_skipped`
 **How to fully validate:** Run a full investigation that generates a remediation plan for a real test VM, then click Approve, then confirm VM transitions with `az vm show -d ... --query powerState -o tsv`.
 
 ### 4. Reject path safety check — PARTIAL

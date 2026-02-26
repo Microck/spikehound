@@ -3,14 +3,15 @@
 # demo/cleanup_demo.sh
 #
 # Cleans up the demo VM state after a demo run.
-# Usage: bash demo/cleanup_demo.sh --vm-name <name> --resource-group <name>
+# Usage: bash demo/cleanup_demo.sh [--vm-name <name>] [--resource-group <name>]
 #
 # This script stops the VM and removes demo tags to reset state.
 
 set -euo pipefail
 
 usage() {
-  echo "Usage: bash demo/cleanup_demo.sh --vm-name <name> --resource-group <name>"
+  echo "Usage: bash demo/cleanup_demo.sh [--vm-name <name>] [--resource-group <name>]"
+  echo "Defaults: --vm-name spikehound-gpu-vm --resource-group spikehound-demo-rg"
 }
 
 run() {
@@ -18,8 +19,8 @@ run() {
   "$@"
 }
 
-VM_NAME=""
-RESOURCE_GROUP=""
+VM_NAME="spikehound-gpu-vm"
+RESOURCE_GROUP="spikehound-demo-rg"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -43,13 +44,6 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
-
-# Validate required arguments
-if [[ -z "$VM_NAME" || -z "$RESOURCE_GROUP" ]]; then
-  echo "Error: Missing required arguments"
-  usage
-  exit 1
-fi
 
 echo "=========================================="
 echo "Spikehound Demo: Cleanup"

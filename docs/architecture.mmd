@@ -64,7 +64,7 @@ graph TB
         AE -->|executed| EX[Azure Compute<br/>stop_vm]
 
         subgraph "Azure Resource"
-            VM[GPU VM<br/>gpu-training-vm]
+            VM[GPU VM<br/>spikehound-gpu-vm]
             EX --> VM
         end
     end

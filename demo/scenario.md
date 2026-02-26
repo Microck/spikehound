@@ -7,13 +7,15 @@ This demo shows the complete **multi-agent investigation pipeline** for a staged
 ## Prerequisites
 
 - Azure CLI is authenticated: `az account show` confirms subscription access
-- Spikehound Functions app is running: `cd dotnet/src/IncidentWarRoom.Functions && func start`
+- Spikehound Functions app is running: `cd dotnet/src/Spikehound.Functions && func start`
 - Slack app webhook URL and signing secret are configured in `.env`
-- `INCIDENT_WR_USE_DURABLE=false` for this demo flow (keeps webhook response/report synchronous)
+- Discord interactions public key is configured in `.env`
+- For Discord interactive buttons, `DISCORD_BOT_TOKEN` + `DISCORD_CHANNEL_ID` are configured
+- `SPIKEHOUND_USE_DURABLE=false` for this demo flow (keeps webhook response/report synchronous)
 
 ## Staged Anomaly
 
-**What happened:** A GPU training VM (`gpu-training-vm`) was left running for 72 hours after the training job completed.
+**What happened:** A GPU training VM (`spikehound-gpu-vm`) was left running for 72 hours after the training job completed.
 
 **Baseline expectation:** \$12.50/day for GPU VM when used appropriately (short training jobs, auto-shutdown configured)
 
@@ -45,13 +47,13 @@ curl -X POST http://localhost:7071/api/webhooks/alert \
         "monitorCondition": "Fired",
         "monitoringService": "Cost Management",
         "alertTargetIDs": [
-          "/subscriptions/<your-subscription-id>/resourceGroups/ai-dev-days-hackathon-eu/providers/Microsoft.Compute/virtualMachines/gpu-training-vm"
+          "/subscriptions/<your-subscription-id>/resourceGroups/spikehound-demo-rg/providers/Microsoft.Compute/virtualMachines/spikehound-gpu-vm"
         ],
         "firedDateTime": "2026-02-11T10:00:00Z",
         "description": "Unexpected GPU VM running for 72 hours with \$450 daily spend"
       },
       "alertContext": {
-        "ResourceId": "/subscriptions/<your-subscription-id>/resourceGroups/ai-dev-days-hackathon-eu/providers/Microsoft.Compute/virtualMachines/gpu-training-vm",
+        "ResourceId": "/subscriptions/<your-subscription-id>/resourceGroups/spikehound-demo-rg/providers/Microsoft.Compute/virtualMachines/spikehound-gpu-vm",
         "costAnomaly": {
           "expectedDailyCost": 12.50,
           "actualDailyCost": 450.00,
@@ -69,7 +71,7 @@ curl -X POST http://localhost:7071/api/webhooks/alert \
 **Output:** Identifies the GPU VM as the top cost driver
 
 ```
-Top cost driver: gpu-training-vm ($450.00/day)
+Top cost driver: spikehound-gpu-vm ($450.00/day)
 Anomaly: 36x above baseline
 ```
 
@@ -78,7 +80,7 @@ Anomaly: 36x above baseline
 **Output:** Retrieves VM configuration and recent activity
 
 ```
-Resource: gpu-training-vm
+Resource: spikehound-gpu-vm
 VM Size: Standard_NC6s_v3
 Status: Running
 Location: francecentral
@@ -111,7 +113,7 @@ Explanation: Training job finished at 10:00 AM UTC but auto-shutdown was not con
 
 ```
 Action Type: stop_vm
-Target: /subscriptions/.../virtualMachines/gpu-training-vm
+Target: /subscriptions/.../virtualMachines/spikehound-gpu-vm
 Description: Stop and deallocate GPU VM
 Human Approval Required: Yes
 Estimated Savings: ~$450/day
@@ -119,15 +121,15 @@ Estimated Savings: ~$450/day
 
 ## Human Approval Flow
 
-After diagnosis completes, a **Slack notification** appears with:
+After diagnosis completes, a **Slack or Discord notification** appears with:
 
 - **Alert ID:** `demo-gpu-spike-001`
-- **Top Cost Driver:** gpu-training-vm ($450/day)
+- **Top Cost Driver:** spikehound-gpu-vm ($450/day)
 - **Confidence:** 85%
 - **Root Cause:** GPU VM left running after training job completed 72 hours ago
-- **First Remediation Action:** stop_vm on gpu-training-vm
+- **First Remediation Action:** stop_vm on spikehound-gpu-vm
 
-### Slack Buttons
+### Action Buttons (Slack / Discord)
 
 1. **Approve** (primary) — Queues the `stop_vm` action to execute
 2. **Reject** (danger) — Records decision but does not execute any action
@@ -137,16 +139,16 @@ After diagnosis completes, a **Slack notification** appears with:
 
 After clicking **Approve**:
 
-1. Server receives the Slack callback with verified HMAC signature
+1. Server receives the Slack or Discord callback with verified signature
 2. `ApprovalRecord` is created with decision `approve`
 3. Background task executes `stop_vm` via Azure Compute API
 4. VM status transitions: Running → Stopped → (optionally) Deallocated
-5. Follow-up Slack message posts execution outcome
+5. Follow-up notification posts execution outcome
 
 ```
 [12:00:15Z] ✅ Remediation completed
 Action: stop_vm
-Target: gpu-training-vm
+Target: spikehound-gpu-vm
 Outcome: SUCCESS - VM stopped and deallocated
 Estimated Savings: $450/day ongoing
 ```
@@ -156,7 +158,7 @@ Estimated Savings: $450/day ongoing
 After the demo, run the cleanup script to reset the VM state:
 
 ```bash
-bash demo/cleanup_demo.sh --vm-name gpu-training-vm --resource-group ai-dev-days-hackathon-eu
+bash demo/cleanup_demo.sh --vm-name spikehound-gpu-vm --resource-group spikehound-demo-rg
 ```
 
 This will:

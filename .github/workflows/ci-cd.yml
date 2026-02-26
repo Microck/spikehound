@@ -1,0 +1,300 @@
+name: Spikehound CI/CD
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: spikehound-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-tests:
+    name: Build And Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build Solution
+        run: dotnet build dotnet/Spikehound.sln -nologo -clp:Summary
+
+      - name: Run Unit Tests
+        run: dotnet test dotnet/Spikehound.sln --no-build --verbosity normal
+
+  local-e2e:
+    name: Local E2E And Edge Cases
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Azurite And Functions Core Tools
+        run: npm install -g azurite azure-functions-core-tools@4 --unsafe-perm true
+
+      - name: Run Inline + Durable Local Verification
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          payload_file="/tmp/spikehound-alert.json"
+          cat > "$payload_file" <<'JSON'
+          {
+            "schemaId": "azureMonitorCommonAlertSchema",
+            "data": {
+              "essentials": {
+                "alertId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AlertsManagement/alerts/demo-gpu-spike-001",
+                "alertRule": "GPU VM Cost Spike",
+                "severity": "Sev1",
+                "signalType": "Metric",
+                "monitorCondition": "Fired",
+                "monitoringService": "Cost Management",
+                "alertTargetIDs": [
+                  "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/spikehound-demo-rg/providers/Microsoft.Compute/virtualMachines/spikehound-gpu-vm"
+                ],
+                "firedDateTime": "2026-02-11T10:00:00Z",
+                "description": "Unexpected GPU VM running for 72 hours with $450 daily spend"
+              },
+              "alertContext": {
+                "ResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/spikehound-demo-rg/providers/Microsoft.Compute/virtualMachines/spikehound-gpu-vm",
+                "costAnomaly": {
+                  "expectedDailyCost": 12.50,
+                  "actualDailyCost": 450.00,
+                  "anomalyFactor": 36.0
+                }
+              }
+            }
+          }
+          JSON
+
+          wait_for_health() {
+            local port="$1"
+            local code=""
+            for _ in $(seq 1 90); do
+              code=$(curl -sS -o "/tmp/spikehound-health-${port}.txt" -w "%{http_code}" "http://localhost:${port}/api/health" || true)
+              if [[ "$code" == "200" ]]; then
+                echo "$code"
+                return 0
+              fi
+              sleep 1
+            done
+            echo "$code"
+            return 1
+          }
+
+          kill_pid_if_set() {
+            local pid="$1"
+            if [[ -n "$pid" ]]; then
+              kill "$pid" 2>/dev/null || true
+            fi
+          }
+
+          AZURITE_PID=""
+          FUNC_PID=""
+
+          cleanup() {
+            kill_pid_if_set "$FUNC_PID"
+            kill_pid_if_set "$AZURITE_PID"
+          }
+          trap cleanup EXIT
+
+          # Inline mode
+          azurite --silent --location /tmp/azurite --debug /tmp/azurite/debug.log >/tmp/spikehound-azurite-inline.log 2>&1 &
+          AZURITE_PID=$!
+
+          pushd dotnet/src/Spikehound.Functions >/dev/null
+          SPIKEHOUND_USE_DURABLE=false SPIKEHOUND_ENABLE_REMEDIATION_EXECUTION=false SLACK_SIGNING_SECRET=ci-signing-secret func start >/tmp/spikehound-func-inline.log 2>&1 &
+          FUNC_PID=$!
+          popd >/dev/null
+
+          inline_health_code=$(wait_for_health 7071)
+          inline_valid_code=$(curl -sS -o /tmp/spikehound-inline-valid.json -w "%{http_code}" -X POST http://localhost:7071/api/webhooks/alert -H 'Content-Type: application/json' --data-binary @"$payload_file")
+          inline_duplicate_code=$(curl -sS -o /tmp/spikehound-inline-duplicate.json -w "%{http_code}" -X POST http://localhost:7071/api/webhooks/alert -H 'Content-Type: application/json' --data-binary @"$payload_file")
+          inline_invalid_code=$(curl -sS -o /tmp/spikehound-inline-invalid.txt -w "%{http_code}" -X POST http://localhost:7071/api/webhooks/alert -H 'Content-Type: application/json' -d '{not json}')
+          inline_slack_code=$(curl -sS -o /tmp/spikehound-inline-slack.txt -w "%{http_code}" -X POST http://localhost:7071/api/webhooks/slack/actions -H 'Content-Type: application/x-www-form-urlencoded' -d 'payload={}')
+          inline_discord_code=$(curl -sS -o /tmp/spikehound-inline-discord.txt -w "%{http_code}" -X POST http://localhost:7071/api/webhooks/discord/interactions -H 'Content-Type: application/json' -d '{}')
+          inline_slack_signed_code=$(python3 - <<'PY'
+          import hashlib
+          import hmac
+          import json
+          import time
+          import urllib.parse
+          import urllib.request
+
+          payload = {
+              "actions": [{"action_id": "approve_remediation", "value": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AlertsManagement/alerts/demo-gpu-spike-001"}],
+              "user": {"username": "ci-user"},
+          }
+
+          body = "payload=" + urllib.parse.quote(json.dumps(payload, separators=(",", ":")))
+          ts = str(int(time.time()))
+          signed = f"v0:{ts}:{body}".encode()
+          signature = "v0=" + hmac.new(b"ci-signing-secret", signed, hashlib.sha256).hexdigest()
+
+          req = urllib.request.Request(
+              "http://localhost:7071/api/webhooks/slack/actions",
+              data=body.encode(),
+              method="POST",
+              headers={
+                  "Content-Type": "application/x-www-form-urlencoded",
+                  "X-Slack-Request-Timestamp": ts,
+                  "X-Slack-Signature": signature,
+              },
+          )
+
+          with urllib.request.urlopen(req, timeout=10) as resp:
+              response_text = resp.read().decode()
+              status_code = resp.getcode()
+
+          with open('/tmp/spikehound-inline-slack-signed.json', 'w', encoding='utf-8') as fh:
+              fh.write(response_text)
+
+          print(status_code)
+          PY
+          )
+          inline_slack_signed_duplicate_code=$(python3 - <<'PY'
+          import hashlib
+          import hmac
+          import json
+          import time
+          import urllib.parse
+          import urllib.request
+
+          payload = {
+              "actions": [{"action_id": "approve_remediation", "value": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AlertsManagement/alerts/demo-gpu-spike-001"}],
+              "user": {"username": "ci-user"},
+          }
+
+          body = "payload=" + urllib.parse.quote(json.dumps(payload, separators=(",", ":")))
+          ts = str(int(time.time()))
+          signed = f"v0:{ts}:{body}".encode()
+          signature = "v0=" + hmac.new(b"ci-signing-secret", signed, hashlib.sha256).hexdigest()
+
+          req = urllib.request.Request(
+              "http://localhost:7071/api/webhooks/slack/actions",
+              data=body.encode(),
+              method="POST",
+              headers={
+                  "Content-Type": "application/x-www-form-urlencoded",
+                  "X-Slack-Request-Timestamp": ts,
+                  "X-Slack-Signature": signature,
+              },
+          )
+
+          with urllib.request.urlopen(req, timeout=10) as resp:
+              response_text = resp.read().decode()
+              status_code = resp.getcode()
+
+          with open('/tmp/spikehound-inline-slack-signed-duplicate.json', 'w', encoding='utf-8') as fh:
+              fh.write(response_text)
+
+          print(status_code)
+          PY
+          )
+
+          [[ "$inline_health_code" == "200" ]]
+          [[ "$inline_valid_code" == "200" ]]
+          [[ "$inline_duplicate_code" == "200" ]]
+          [[ "$inline_invalid_code" == "400" ]]
+          [[ "$inline_slack_code" == "401" ]]
+          [[ "$inline_discord_code" == "401" ]]
+          [[ "$inline_slack_signed_code" == "200" ]]
+          [[ "$inline_slack_signed_duplicate_code" == "200" ]]
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          inline = json.loads(Path('/tmp/spikehound-inline-valid.json').read_text())
+          duplicate = json.loads(Path('/tmp/spikehound-inline-duplicate.json').read_text())
+          signed_slack = json.loads(Path('/tmp/spikehound-inline-slack-signed.json').read_text())
+          signed_slack_duplicate = json.loads(Path('/tmp/spikehound-inline-slack-signed-duplicate.json').read_text())
+          invalid_body = Path('/tmp/spikehound-inline-invalid.txt').read_text(errors='replace').strip()
+
+          assert 'UnifiedFindings' in inline, 'inline response missing UnifiedFindings'
+          assert sorted(inline.keys()) == sorted(duplicate.keys()), 'duplicate response shape mismatch'
+          assert invalid_body == 'invalid json', f'unexpected invalid-json body: {invalid_body!r}'
+          signed_text = signed_slack.get('text', '').lower()
+          assert 'recorded *approve* decision' in signed_text, f'unexpected signed slack response: {signed_slack!r}'
+          assert 'disabled by configuration' in signed_text, f'unexpected signed slack response: {signed_slack!r}'
+          signed_duplicate_text = signed_slack_duplicate.get('text', '').lower()
+          assert 'already been queued' in signed_duplicate_text, f'unexpected duplicate signed slack response: {signed_slack_duplicate!r}'
+          PY
+
+          kill_pid_if_set "$FUNC_PID"
+          kill_pid_if_set "$AZURITE_PID"
+          FUNC_PID=""
+          AZURITE_PID=""
+          sleep 1
+
+          # Durable mode
+          azurite --silent --location /tmp/azurite --debug /tmp/azurite/debug.log >/tmp/spikehound-azurite-durable.log 2>&1 &
+          AZURITE_PID=$!
+
+          pushd dotnet/src/Spikehound.Functions >/dev/null
+          SPIKEHOUND_USE_DURABLE=true func start --port 7072 >/tmp/spikehound-func-durable.log 2>&1 &
+          FUNC_PID=$!
+          popd >/dev/null
+
+          durable_health_code=$(wait_for_health 7072)
+          durable_code=$(curl -sS -o /tmp/spikehound-durable.json -w "%{http_code}" -X POST http://localhost:7072/api/webhooks/alert -H 'Content-Type: application/json' --data-binary @"$payload_file")
+
+          [[ "$durable_health_code" == "200" ]]
+          [[ "$durable_code" == "202" ]]
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          durable = json.loads(Path('/tmp/spikehound-durable.json').read_text())
+          assert durable.get('mode') == 'durable', f"unexpected mode: {durable.get('mode')!r}"
+          assert durable.get('accepted') is True, f"unexpected accepted: {durable.get('accepted')!r}"
+          assert 'instanceId' in durable and durable['instanceId'], 'missing durable instanceId'
+          PY
+
+  deploy-functions:
+    name: Deploy Azure Function App
+    needs: local-e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.SPIKEHOUND_FUNCTIONAPP_NAME != '' && secrets.SPIKEHOUND_FUNCTIONAPP_PUBLISH_PROFILE != ''
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Publish Function App
+        run: dotnet publish dotnet/src/Spikehound.Functions/Spikehound.Functions.csproj --configuration Release --output ./publish
+
+      - name: Deploy To Azure Functions
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ vars.SPIKEHOUND_FUNCTIONAPP_NAME }}
+          package: ./publish
+          publish-profile: ${{ secrets.SPIKEHOUND_FUNCTIONAPP_PUBLISH_PROFILE }}
