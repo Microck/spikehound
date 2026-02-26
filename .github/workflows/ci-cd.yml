@@ -53,6 +53,14 @@ jobs:
       - name: Install Azurite And Functions Core Tools
         run: npm install -g azurite azure-functions-core-tools@4 --unsafe-perm true
 
+      - name: Create local.settings.json For Functions Host
+        run: |
+          echo '{"IsEncrypted":false,"Values":{"AzureWebJobsStorage":"UseDevelopmentStorage=true","FUNCTIONS_WORKER_RUNTIME":"dotnet-isolated"}}' \
+            > dotnet/src/Spikehound.Functions/local.settings.json
+
+      - name: Build Solution
+        run: dotnet build dotnet/Spikehound.sln -nologo -clp:Summary
+
       - name: Run Inline + Durable Local Verification
         shell: bash
         run: |
@@ -272,6 +280,21 @@ jobs:
           assert durable.get('accepted') is True, f"unexpected accepted: {durable.get('accepted')!r}"
           assert 'instanceId' in durable and durable['instanceId'], 'missing durable instanceId'
           PY
+
+      - name: Dump Functions Host Logs On Failure
+        if: failure()
+        run: |
+          echo "=== Inline mode func host log ==="
+          cat /tmp/spikehound-func-inline.log 2>/dev/null || echo "(not found)"
+          echo ""
+          echo "=== Durable mode func host log ==="
+          cat /tmp/spikehound-func-durable.log 2>/dev/null || echo "(not found)"
+          echo ""
+          echo "=== Azurite inline log ==="
+          tail -30 /tmp/spikehound-azurite-inline.log 2>/dev/null || echo "(not found)"
+          echo ""
+          echo "=== Azurite durable log ==="
+          tail -30 /tmp/spikehound-azurite-durable.log 2>/dev/null || echo "(not found)"
 
   deploy-functions:
     name: Deploy Azure Function App
