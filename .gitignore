@@ -78,6 +78,12 @@ test-results/
 playwright-report/
 TestResults/
 
+# ── Demo artifacts (personal, not public-facing) ─────────────────────────────
+
+demo/voiceover.md
+demo/SEEDANCE.md
+demo/VEO.md
+
 # ── Logs ──────────────────────────────────────────────────────────────────────
 
 *.log
