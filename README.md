@@ -257,14 +257,14 @@ Supported interaction types: `approve_remediation`, `reject_remediation`, `inves
 
 ```mermaid
 flowchart TD
-    AM([Azure Monitor\nCost Alert])
-    AW["Webhook\n/api/webhooks/alert"]
+    AM([Azure Monitor<br/>Cost Alert])
+    AW["Webhook<br/>/api/webhooks/alert"]
 
     AM --> AW
 
-    CA["Cost Analyst\nCost Management API"]
-    RA["Resource Agent\nResource Graph"]
-    HA["History Agent\nAI Search / Cosmos DB"]
+    CA["Cost Analyst<br/>Cost Management API"]
+    RA["Resource Agent<br/>Resource Graph"]
+    HA["History Agent<br/>AI Search / Cosmos DB"]
 
     AW --> CA & RA & HA
 
@@ -272,7 +272,7 @@ flowchart TD
 
     CA & RA & HA --> CF
 
-    DA["Diagnosis Agent\nAI Foundry / GPT-4o"]
+    DA["Diagnosis Agent<br/>AI Foundry / GPT-4o"]
     CF --> DA
 
     RP["Remediation Planner"]
@@ -295,7 +295,7 @@ flowchart TD
     GATE -->|"enabled"| REO
     GATE -->|"disabled"| SAFE
 
-    AZ["Azure Compute\nstop_vm"]
+    AZ["Azure Compute<br/>stop_vm"]
     FU["Follow-up Notification"]
 
     REO --> AZ --> FU
