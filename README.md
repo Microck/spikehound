@@ -6,9 +6,12 @@
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![CI](https://github.com/Microck/spikehound/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Microck/spikehound/actions/workflows/ci-cd.yml)
 
-**When Azure costs spike, 5 specialized agents investigate in parallel, diagnose the root cause, and propose a fix — all before a human needs to look at a dashboard.**
+**When Azure costs spike, 5 specialized agents investigate in parallel, diagnose the root cause, and propose a fix; all before a human needs to look at a dashboard.**
 
 Spikehound is a multi-agent incident workflow for Azure cost anomalies. It ingests an Azure Monitor alert, fans out to parallel investigator agents (Cost, Resource, History), synthesizes a diagnosis via Azure AI Foundry, proposes a remediation plan, and routes it through a Slack or Discord human-approval gate. Built on .NET 8 Azure Functions with optional Durable Functions orchestration.
+
+<img width="auto" height="300" alt="activity" src="https://github.com/user-attachments/assets/81ffbd0e-620d-426c-9e74-ef6e2a6fa306" />
+
 
 ---
 
@@ -45,11 +48,11 @@ POST /api/webhooks/alert
 ```
 
 **Key properties:**
-- **Parallel investigation** — Cost, Resource, and History agents run concurrently via `Task.WhenAll`
-- **Two execution modes** — inline (synchronous, `200` response) or Durable Functions (async, `202` + `instanceId`)
-- **Human-in-the-loop** — remediation never executes without an explicit Approve decision
-- **Safe by default** — `SPIKEHOUND_ENABLE_REMEDIATION_EXECUTION=false` (the default) records decisions but skips execution
-- **Idempotent** — duplicate Approve decisions for the same investigation do not trigger a second execution
+- **Parallel investigation**: Cost, Resource, and History agents run concurrently via `Task.WhenAll`
+- **Two execution modes**: inline (synchronous, `200` response) or Durable Functions (async, `202` + `instanceId`)
+- **Human-in-the-loop**: remediation never executes without an explicit Approve decision
+- **Safe by default**: `SPIKEHOUND_ENABLE_REMEDIATION_EXECUTION=false` (the default) records decisions but skips execution
+- **Idempotent**: duplicate Approve decisions for the same investigation do not trigger a second execution
 
 ---
 
@@ -186,7 +189,7 @@ set -a; source .env; set +a
 
 **Recommendation:** keep both at their defaults until you have a safe demo VM to target.
 
-### Azure credentials (optional — enables live agent calls)
+### Azure credentials (optional, enables live agent calls)
 
 | Variable | Purpose |
 |----------|---------|
@@ -195,7 +198,7 @@ set -a; source .env; set +a
 | `AZURE_CLIENT_SECRET` | Service principal secret |
 | `AZURE_SUBSCRIPTION_ID` | Target subscription for Cost Management / Resource Graph |
 
-### Azure AI Foundry (optional — enables LLM diagnosis)
+### Azure AI Foundry (optional, enables LLM diagnosis)
 
 | Variable | Purpose |
 |----------|---------|
@@ -219,7 +222,7 @@ Configure Slack Interactivity Request URL to: `https://<your-host>/api/webhooks/
 | Variable | Purpose |
 |----------|---------|
 | `DISCORD_WEBHOOK_URL` | Webhook URL for notification-only delivery |
-| `DISCORD_BOT_TOKEN` | Bot token — enables interactive buttons (recommended) |
+| `DISCORD_BOT_TOKEN` | Bot token, enables interactive buttons (recommended) |
 | `DISCORD_CHANNEL_ID` | Target channel for bot messages |
 | `DISCORD_INTERACTIONS_PUBLIC_KEY` | Required to verify signed interaction callbacks |
 
@@ -386,10 +389,10 @@ dotnet test Spikehound.sln
 
 The test suite covers:
 
-- **Unit tests** — agent logic, alert normalization, approval deduplication
-- **E2E smoke** — inline mode success path, idempotent duplicate path
-- **Edge cases** — invalid JSON → `400`, unsigned Slack/Discord callbacks → `401`
-- **Durable mode** — scheduling response `202` with `instanceId`
+- **Unit tests**: agent logic, alert normalization, approval deduplication
+- **E2E smoke**: inline mode success path, idempotent duplicate path
+- **Edge cases**: invalid JSON → `400`, unsigned Slack/Discord callbacks → `401`
+- **Durable mode**: scheduling response `202` with `instanceId`
 
 ---
 
@@ -423,7 +426,7 @@ GitHub Actions workflow: [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd
 Issues and pull requests are welcome.
 
 1. Fork the repository and create a feature branch
-2. Run `dotnet test` — all tests must pass
+2. Run `dotnet test`. All tests must pass
 3. Open a pull request with a clear description of what changed and why
 
 For substantial changes, open an issue first to discuss the approach.
@@ -432,10 +435,10 @@ For substantial changes, open an issue first to discuss the approach.
 
 ## License
 
-Apache-2.0 — see [`LICENSE`](LICENSE).
+Apache-2.0. See [`LICENSE`](LICENSE).
 
 ---
 
 ## Origin
 
-Spikehound was built during the Microsoft AI Dev Days Hackathon 2026 (Feb–Mar 2026), targeting the Agentic DevOps, Multi-Agent, and Azure Integration prize tracks. The repository is structured as a normal OSS project and is intended to be runnable outside of the hackathon context.
+Spikehound was built during the Microsoft AI Dev Days Hackathon 2026 (Feb-Mar 2026), targeting the Agentic DevOps, Multi-Agent, and Azure Integration prize tracks. The repository is structured as a normal OSS project and is intended to be runnable outside of the hackathon context.
