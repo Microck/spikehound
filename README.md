@@ -73,28 +73,44 @@ cp .env.example .env
 set -a; source .env; set +a
 ```
 
-**2. Start the storage emulator (Terminal 1):**
+**2. Create the local Functions settings file:**
+
+```bash
+cat > dotnet/src/Spikehound.Functions/local.settings.json <<'EOF'
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
+  }
+}
+EOF
+```
+
+> This file is gitignored (it can contain secrets in production). The above minimal config points the Functions host at Azurite.
+
+**3. Start the storage emulator (Terminal 1):**
 
 ```bash
 mkdir -p /tmp/azurite
 azurite --silent --location /tmp/azurite --debug /tmp/azurite/debug.log
 ```
 
-**3. Start the Functions host (Terminal 2):**
+**4. Start the Functions host (Terminal 2):**
 
 ```bash
 cd dotnet/src/Spikehound.Functions
 func start
 ```
 
-**4. Verify it's running:**
+**5. Verify it's running:**
 
 ```bash
 curl -sS http://localhost:7071/api/health
 # → {"ok":true}
 ```
 
-**5. Trigger a demo investigation:**
+**6. Trigger a demo investigation:**
 
 ```bash
 curl -sS -X POST http://localhost:7071/api/webhooks/alert \
