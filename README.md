@@ -72,7 +72,7 @@ POST /api/webhooks/alert
 git clone https://github.com/Microck/spikehound.git
 cd spikehound
 cp .env.example .env
-# Edit .env — at minimum, review the two safety toggles (see Configuration)
+# Edit .env - at minimum, review the two safety toggles (see Configuration)
 set -a; source .env; set +a
 ```
 
@@ -309,7 +309,7 @@ flowchart TD
     AREC -->|"Approve"| GATE
 
     REO["Remediation Orchestrator"]
-    SAFE["Skipped — safe default"]
+    SAFE["Skipped - safe default"]
 
     GATE -->|"enabled"| REO
     GATE -->|"disabled"| SAFE
