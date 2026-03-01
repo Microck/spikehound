@@ -8,6 +8,8 @@
 
 **When Azure costs spike, 5 specialized agents investigate in parallel, diagnose the root cause, and propose a fix; all before a human needs to look at a dashboard.**
 
+The name **Spikehound** reflects its mission: a specialized tracker (or "hound") designed to relentlessly hunt down the source of Azure cost **spikes**.
+
 Spikehound is a multi-agent incident workflow for Azure cost anomalies. It ingests an Azure Monitor alert, fans out to parallel investigator agents (Cost, Resource, History), synthesizes a diagnosis via Azure AI Foundry, proposes a remediation plan, and routes it through a Slack or Discord human-approval gate. Built on .NET 8 Azure Functions with optional Durable Functions orchestration.
 
 <img width="auto" height="301" alt="activity" src="https://github.com/user-attachments/assets/81ffbd0e-620d-426c-9e74-ef6e2a6fa306" />
